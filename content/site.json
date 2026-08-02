@@ -9,5 +9,18 @@
     "phone": "",
     "email": "",
     "website": ""
+  },
+
+  "branding": {
+    "primaryColor": "blue",
+    "accentColor": "slate"
+  },
+
+  "hero": {
+    "eyebrow": "Trusted Roofing Professionals",
+    "headline": "Roof Repair in Modesto, CA",
+    "subheadline": "Fast roof repairs, leak detection, emergency roofing, and complete roof replacement for homes throughout Modesto.",
+    "primaryButton": "Free Estimate",
+    "secondaryButton": "Call Today"
   }
 }
