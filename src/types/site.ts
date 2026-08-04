@@ -1,3 +1,22 @@
+/**
+ * Site-wide configuration — everything that is true across every page.
+ *
+ * Page-level content lives in `content/pages/*.json` and is typed in `./page`.
+ */
+
+export interface PostalAddress {
+  street: string;
+  city: string;
+  state: string;
+  postalCode: string;
+  country: string;
+}
+
+export interface GeoCoordinates {
+  latitude: string;
+  longitude: string;
+}
+
 export interface Business {
   name: string;
   industry: string;
@@ -7,7 +26,16 @@ export interface Business {
   region: string;
   phone: string;
   email: string;
-  website: string;
+  /** Contractor licence number. Surfaced as a trust signal and in schema. */
+  licenseNumber: string;
+  /** schema.org priceRange, e.g. "$$". */
+  priceRange: string;
+  address: PostalAddress;
+  geo: GeoCoordinates;
+  /** schema.org openingHours strings, e.g. "Mo-Fr 08:00-17:00". */
+  hours: string[];
+  /** Profile URLs used for schema.org sameAs — GBP, Facebook, Yelp. */
+  sameAs: string[];
 }
 
 export interface Branding {
@@ -25,124 +53,22 @@ export interface Navigation {
   cta: string;
 }
 
-export interface Hero {
-  eyebrow: string;
-  headline: string;
-  subheadline: string;
-  primaryButton: string;
-  secondaryButton: string;
-}
-
-export interface ServiceItem {
-  title: string;
-  description: string;
-  bullets: string[];
-}
-
-export interface ServicesSection {
-  eyebrow: string;
-  title: string;
-  description: string;
-  items: ServiceItem[];
-}
-
-export interface FeatureItem {
-  title: string;
-  description: string;
-}
-
-export interface WhyChooseUsSection {
-  eyebrow: string;
-  title: string;
-  description: string;
-  items: FeatureItem[];
-}
-
-export interface ProofStat {
-  value: string;
-  label: string;
-}
-
-export interface ProofSection {
-  eyebrow: string;
-  title: string;
-  description: string;
-  stats: ProofStat[];
-}
-
-export interface ProcessStep {
-  title: string;
-  description: string;
-}
-
-export interface ProcessSection {
-  eyebrow: string;
-  title: string;
-  description: string;
-  steps: ProcessStep[];
-}
-
-export interface TestimonialItem {
-  quote: string;
-  author: string;
-  role: string;
-}
-
-export interface TestimonialsSection {
-  eyebrow: string;
-  title: string;
-  description: string;
-  items: TestimonialItem[];
-}
-
-export interface FAQItem {
-  question: string;
-  answer: string;
-}
-
-export interface FAQSection {
-  eyebrow: string;
-  title: string;
-  description: string;
-  items: FAQItem[];
-}
-
-export interface CTASection {
-  eyebrow: string;
-  title: string;
-  description: string;
-  primaryButton: string;
-  secondaryButton: string;
-}
-
-export interface FooterSection {
+export interface FooterConfig {
   headline: string;
   copyright: string;
 }
 
-export interface SEOSection {
-  title: string;
-  description: string;
-  canonical: string;
-}
-
-export interface SchemaSection {
+export interface SchemaConfig {
+  /** schema.org LocalBusiness subtype, e.g. "RoofingContractor", "Plumber". */
   businessType: string;
 }
 
-export interface SiteContent {
+export interface SiteConfig {
+  /** Canonical origin, no trailing slash. The only place the domain appears. */
+  url: string;
   business: Business;
   branding: Branding;
   navigation: Navigation;
-  hero: Hero;
-  services: ServicesSection;
-  whyChooseUs: WhyChooseUsSection;
-  proof: ProofSection;
-  process: ProcessSection;
-  testimonials: TestimonialsSection;
-  faq: FAQSection;
-  cta: CTASection;
-  footer: FooterSection;
-  seo: SEOSection;
-  schema: SchemaSection;
+  footer: FooterConfig;
+  schema: SchemaConfig;
 }

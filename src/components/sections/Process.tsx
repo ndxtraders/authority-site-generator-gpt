@@ -1,18 +1,7 @@
 import Container from "@/components/common/Container";
 import Section from "@/components/common/Section";
 import SectionHeading from "@/components/common/SectionHeading";
-
-interface ProcessStep {
-  title: string;
-  description: string;
-}
-
-interface ProcessProps {
-  eyebrow: string;
-  title: string;
-  description: string;
-  steps: ProcessStep[];
-}
+import type { ProcessProps } from "@/types/sections";
 
 export default function Process({ eyebrow, title, description, steps }: ProcessProps) {
   return (

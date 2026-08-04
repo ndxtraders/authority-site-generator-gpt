@@ -1,18 +1,7 @@
 import Container from "@/components/common/Container";
 import Section from "@/components/common/Section";
 import SectionHeading from "@/components/common/SectionHeading";
-
-interface FAQItem {
-  question: string;
-  answer: string;
-}
-
-interface FAQProps {
-  eyebrow: string;
-  title: string;
-  description: string;
-  items: FAQItem[];
-}
+import type { FAQProps } from "@/types/sections";
 
 export default function FAQ({ eyebrow, title, description, items }: FAQProps) {
   return (

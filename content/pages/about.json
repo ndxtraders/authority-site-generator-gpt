@@ -1,0 +1,72 @@
+{
+  "slug": "about",
+  "pageType": "about",
+  "seo": {
+    "title": "About Us | Roof Repair Modesto",
+    "description": "Learn more about Roof Repair Modesto and the local service experience behind every roofing project we take on.",
+    "canonicalPath": "/about"
+  },
+  "schema": [],
+  "internalLinks": ["/services", "/contact"],
+  "sections": [
+    {
+      "type": "Hero",
+      "props": {
+        "eyebrow": "About Us",
+        "headline": "A local roofing team built on trust and clear communication",
+        "subheadline": "We combine hands-on experience with responsive service so homeowners can feel confident every step of the way.",
+        "primaryButton": "Free Estimate",
+        "secondaryButton": "Call Today"
+      }
+    },
+    {
+      "type": "WhyChooseUs",
+      "props": {
+        "eyebrow": "Why Homeowners Choose Us",
+        "title": "Local experience backed by clear communication",
+        "description": "We make the process simple, transparent, and stress-free from the first call to final inspection.",
+        "items": [
+          {
+            "title": "Responsive Team",
+            "description": "Fast scheduling and direct communication when you need answers most."
+          },
+          {
+            "title": "Licensed & Insured",
+            "description": "Reliable workmanship with proper insurance and professional standards."
+          },
+          {
+            "title": "Transparent Quotes",
+            "description": "Clear recommendations and honest pricing with no pressure."
+          },
+          {
+            "title": "Local Knowledge",
+            "description": "We understand the weather, building styles, and roofing needs of the region."
+          }
+        ]
+      }
+    },
+    {
+      "type": "Proof",
+      "props": {
+        "eyebrow": "Trusted Results",
+        "title": "Years of experience protecting homes across the area",
+        "description": "We help homeowners move quickly from inspection to completed repairs with confidence.",
+        "stats": [
+          { "value": "25+", "label": "Years Serving the Area" },
+          { "value": "1,200+", "label": "Projects Completed" },
+          { "value": "24/7", "label": "Emergency Response" }
+        ]
+      }
+    },
+    {
+      "type": "CTA",
+      "props": {
+        "eyebrow": "Ready to get started?",
+        "title": "Schedule your free roof inspection today",
+        "description": "Book a consultation and get a clear plan for repairs, replacement, or maintenance.",
+        "primaryButton": "Request Estimate",
+        "secondaryButton": "Call Now"
+      }
+    }
+  ]
+}

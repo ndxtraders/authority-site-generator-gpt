@@ -1,9 +1,11 @@
 {
-  "name": "roof-repair-modesto",
-  "version": "0.1.0",
+  "name": "authority-site-generator",
+  "version": "0.3.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "validate": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/validate-content.mts",
+    "prebuild": "npm run validate",
     "build": "next build",
     "start": "next start",
     "lint": "eslint"

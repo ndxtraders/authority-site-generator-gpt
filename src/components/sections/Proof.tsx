@@ -1,15 +1,6 @@
 import Container from "@/components/common/Container";
 import Section from "@/components/common/Section";
-
-interface ProofProps {
-  eyebrow: string;
-  title: string;
-  description: string;
-  stats: Array<{
-    value: string;
-    label: string;
-  }>;
-}
+import type { ProofProps } from "@/types/sections";
 
 export default function Proof({ eyebrow, title, description, stats }: ProofProps) {
   return (

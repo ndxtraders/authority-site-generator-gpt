@@ -1,0 +1,59 @@
+{
+  "slug": "services",
+  "pageType": "services",
+  "seo": {
+    "title": "Roofing Services | Roof Repair Modesto",
+    "description": "Explore roof repair, replacement, and inspection services for homes and businesses throughout Modesto, CA.",
+    "canonicalPath": "/services"
+  },
+  "schema": [],
+  "internalLinks": ["/about", "/contact"],
+  "sections": [
+    {
+      "type": "Hero",
+      "props": {
+        "eyebrow": "Trusted Roofing Professionals",
+        "headline": "Reliable roofing services for every stage of ownership",
+        "subheadline": "Whether you need a quick repair, a full replacement, or a professional inspection, our team is ready to help.",
+        "primaryButton": "Free Estimate",
+        "secondaryButton": "Call Today"
+      }
+    },
+    {
+      "type": "Services",
+      "props": {
+        "eyebrow": "Our Services",
+        "title": "Dependable roofing solutions built for lasting protection",
+        "description": "From urgent repairs to full replacements, we deliver roofing work that protects your home and your peace of mind.",
+        "itemCta": "Request Service",
+        "items": [
+          {
+            "title": "Roof Repair",
+            "description": "Fast response for leaks, storm damage, missing shingles, and general wear.",
+            "bullets": ["Leak detection", "Shingle replacement", "Storm response"]
+          },
+          {
+            "title": "Roof Replacement",
+            "description": "Complete roof replacement with premium materials and expert installation.",
+            "bullets": ["Material selection", "Full tear-off", "Warranty-backed installs"]
+          },
+          {
+            "title": "Inspections",
+            "description": "Detailed inspections for maintenance planning, insurance claims, and pre-sale needs.",
+            "bullets": ["Roof health reports", "Insurance support", "Maintenance guidance"]
+          }
+        ]
+      }
+    },
+    {
+      "type": "CTA",
+      "props": {
+        "eyebrow": "Ready to get started?",
+        "title": "Schedule your free roof inspection today",
+        "description": "Book a consultation and get a clear plan for repairs, replacement, or maintenance.",
+        "primaryButton": "Request Estimate",
+        "secondaryButton": "Call Now"
+      }
+    }
+  ]
+}

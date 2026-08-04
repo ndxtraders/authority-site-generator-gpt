@@ -1,16 +1,9 @@
 import Container from "@/components/common/Container";
 import Section from "@/components/common/Section";
 import { Button } from "@/components/ui/button";
+import type { CTAProps } from "@/types/sections";
 
-interface CtaProps {
-  eyebrow: string;
-  title: string;
-  description: string;
-  primaryButton: string;
-  secondaryButton: string;
-}
-
-export default function CTA({ eyebrow, title, description, primaryButton, secondaryButton }: CtaProps) {
+export default function CTA({ eyebrow, title, description, primaryButton, secondaryButton }: CTAProps) {
   return (
     <Section id="cta" className="bg-slate-900">
       <Container>

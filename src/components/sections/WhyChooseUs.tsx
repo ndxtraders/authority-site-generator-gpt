@@ -1,16 +1,7 @@
 import Container from "@/components/common/Container";
 import Section from "@/components/common/Section";
 import SectionHeading from "@/components/common/SectionHeading";
-
-interface WhyChooseUsProps {
-  eyebrow: string;
-  title: string;
-  description: string;
-  items: Array<{
-    title: string;
-    description: string;
-  }>;
-}
+import type { WhyChooseUsProps } from "@/types/sections";
 
 export default function WhyChooseUs({ eyebrow, title, description, items }: WhyChooseUsProps) {
   return (

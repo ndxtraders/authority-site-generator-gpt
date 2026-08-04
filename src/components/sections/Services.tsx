@@ -2,21 +2,9 @@ import Container from "@/components/common/Container";
 import Section from "@/components/common/Section";
 import SectionHeading from "@/components/common/SectionHeading";
 import { Button } from "@/components/ui/button";
+import type { ServicesProps } from "@/types/sections";
 
-interface ServiceItem {
-  title: string;
-  description: string;
-  bullets: string[];
-}
-
-interface ServicesProps {
-  eyebrow: string;
-  title: string;
-  description: string;
-  items: ServiceItem[];
-}
-
-export default function Services({ eyebrow, title, description, items }: ServicesProps) {
+export default function Services({ eyebrow, title, description, items, itemCta }: ServicesProps) {
   return (
     <Section id="services" className="bg-white">
       <Container>
@@ -38,7 +26,7 @@ export default function Services({ eyebrow, title, description, items }: Service
               </ul>
 
               <Button className="mt-8" variant="outline">
-                Request Service
+                {itemCta}
               </Button>
             </div>
           ))}

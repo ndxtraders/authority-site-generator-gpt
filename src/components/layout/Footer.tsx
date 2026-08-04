@@ -1,6 +1,8 @@
-import { site } from "@/lib/site";
+import { getSite } from "@/lib/content";
 
 export default function Footer() {
+  const site = getSite();
+
   return (
     <footer className="border-t border-slate-800 bg-slate-900">
       <div className="mx-auto max-w-7xl px-6 py-16 text-slate-300 lg:px-8">

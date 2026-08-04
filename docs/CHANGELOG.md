@@ -1,5 +1,26 @@
 # Changelog
 
+## v0.3 — Page-based content model
+
+- Split `content/site.json` into site-wide config plus `content/pages/*.json`
+- Added `Section` discriminated union derived from a single `SectionPropsMap`
+- Added type-safe section dispatch (`src/lib/sections.tsx`) — a switch, not a lookup
+  table, so no cast is needed and a missing case is a compile error
+- Added `src/lib/content.ts` as the only module that knows where content lives
+- Added `Answer` (AEO answer-first block), `ContactInfo` (NAP), and `ContactForm` sections
+- All four pages reduced to 7-line orchestrators — **zero business copy left in `src/`**
+- Added `scripts/validate-content.mts`, gating `next build` via `prebuild`
+- Expanded `business` with `address`, `geo`, `hours`, `sameAs`, `licenseNumber`,
+  `priceRange` for the Phase 2 schema engine
+- `Services` gained `itemCta`, retiring the hardcoded "Request Service" string
+- Archived `src/lib/site.ts`, superseded by `content.ts`
+- Renamed the package to `authority-site-generator`
+
+**Fixed:** defects 1, 2, 18, 19 (partially 14 — form strings, not submission).
+
+**Still open from the v0.2 audit:** canonicals, schema, sitemap/robots/manifest
+hardcoding, `tel:` links, mobile nav, branding tokens. Phases 2–6.
+
 ## v0.2 — Reusable section architecture
 
 - Added layout primitives: `Container`, `Section`, `SectionHeading`

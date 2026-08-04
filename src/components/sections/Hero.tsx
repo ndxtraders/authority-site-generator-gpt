@@ -1,13 +1,6 @@
 import Container from "@/components/common/Container";
 import { Button } from "@/components/ui/button";
-
-export interface HeroProps {
-  eyebrow: string;
-  headline: string;
-  subheadline: string;
-  primaryButton: string;
-  secondaryButton: string;
-}
+import type { HeroProps } from "@/types/sections";
 
 export default function Hero({
   eyebrow,

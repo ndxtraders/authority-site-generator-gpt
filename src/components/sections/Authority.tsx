@@ -1,19 +1,7 @@
 import Container from "@/components/common/Container";
 import Section from "@/components/common/Section";
 import SectionHeading from "@/components/common/SectionHeading";
-
-interface AuthorityItem {
-  title: string;
-  description: string;
-}
-
-interface AuthorityProps {
-  eyebrow: string;
-  title: string;
-  description: string;
-  items: AuthorityItem[];
-  callout: string;
-}
+import type { AuthorityProps } from "@/types/sections";
 
 export default function Authority({ eyebrow, title, description, items, callout }: AuthorityProps) {
   return (

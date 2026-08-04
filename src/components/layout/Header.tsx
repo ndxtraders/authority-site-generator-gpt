@@ -1,9 +1,11 @@
 import Link from "next/link";
 
-import { site } from "@/lib/site";
+import { getSite } from "@/lib/content";
 import { Button } from "@/components/ui/button";
 
 export default function Header() {
+  const site = getSite();
+
   return (
     <header className="border-b border-slate-200 bg-white/95 backdrop-blur">
       <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-6 lg:px-8">

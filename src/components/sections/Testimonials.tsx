@@ -1,19 +1,7 @@
 import Container from "@/components/common/Container";
 import Section from "@/components/common/Section";
 import SectionHeading from "@/components/common/SectionHeading";
-
-interface TestimonialItem {
-  quote: string;
-  author: string;
-  role: string;
-}
-
-interface TestimonialsProps {
-  eyebrow: string;
-  title: string;
-  description: string;
-  items: TestimonialItem[];
-}
+import type { TestimonialsProps } from "@/types/sections";
 
 export default function Testimonials({ eyebrow, title, description, items }: TestimonialsProps) {
   return (

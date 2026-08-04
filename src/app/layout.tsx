@@ -4,16 +4,23 @@ import "./globals.css";
 
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
-import { site } from "@/lib/site";
+import { getPage, getSite } from "@/lib/content";
 
+const site = getSite();
+const home = getPage("home");
+
+// TEMPORARY (Phase 2.3 replaces this).
+// One hardcoded LocalBusiness literal emitted on every page, ignoring
+// site.schema.businessType and omitting address, geo, hours, and sameAs.
+// Replaced by the schema generator in src/lib/schema/.
 const structuredData = {
   "@context": "https://schema.org",
   "@type": "LocalBusiness",
   name: site.business.name,
-  description: site.seo.description,
+  description: home.seo.description,
   telephone: site.business.phone,
   email: site.business.email,
-  url: site.business.website,
+  url: site.url,
   address: {
     "@type": "PostalAddress",
     addressLocality: site.business.city,
@@ -33,22 +40,27 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+// TEMPORARY (Phase 2.2 replaces this).
+// Site-wide defaults only. Every page currently inherits the home page's title,
+// description, and canonical, which is defect #9 — three of four pages declare
+// the home page as canonical. Fixed by per-page generateMetadata in 2.2.
 export const metadata: Metadata = {
-  title: site.seo.title,
-  description: site.seo.description,
+  metadataBase: new URL(site.url),
+  title: home.seo.title,
+  description: home.seo.description,
   alternates: {
-    canonical: site.seo.canonical,
+    canonical: home.seo.canonicalPath,
   },
   openGraph: {
-    title: site.seo.title,
-    description: site.seo.description,
-    url: site.seo.canonical,
+    title: home.seo.title,
+    description: home.seo.description,
+    url: home.seo.canonicalPath,
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: site.seo.title,
-    description: site.seo.description,
+    title: home.seo.title,
+    description: home.seo.description,
   },
 };
 
@@ -69,13 +81,10 @@ export default function RootLayout({
         />
         <Header />
 
-        <main className="flex-1">
-          {children}
-        </main>
+        <main className="flex-1">{children}</main>
 
         <Footer />
       </body>
     </html>
   );
 }
-

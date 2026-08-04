@@ -1,0 +1,50 @@
+{
+  "slug": "contact",
+  "pageType": "contact",
+  "seo": {
+    "title": "Contact Us | Roof Repair Modesto",
+    "description": "Get in touch with Roof Repair Modesto for a free estimate, a roof inspection, or an emergency service request.",
+    "canonicalPath": "/contact"
+  },
+  "schema": [],
+  "internalLinks": ["/services", "/about"],
+  "sections": [
+    {
+      "type": "Hero",
+      "props": {
+        "eyebrow": "Contact Us",
+        "headline": "Let’s talk about your roof project",
+        "subheadline": "Tell us what’s going on and we’ll help you map out the right next step.",
+        "primaryButton": "Free Estimate",
+        "secondaryButton": "Call Today"
+      }
+    },
+    {
+      "type": "ContactInfo",
+      "props": {
+        "title": "Get a fast response",
+        "description": "We’re available for urgent issues, inspections, and general project questions. Call or fill out the form and we’ll get back to you soon.",
+        "phoneLabel": "Phone",
+        "emailLabel": "Email",
+        "areaLabel": "Service Area"
+      }
+    },
+    {
+      "type": "ContactForm",
+      "props": {
+        "title": "Request a free estimate",
+        "description": "Share a few details and we’ll reach out with the next steps.",
+        "fields": {
+          "name": { "label": "Name", "placeholder": "Your name" },
+          "phone": { "label": "Phone", "placeholder": "(555) 123-4567" },
+          "email": { "label": "Email", "placeholder": "you@example.com" },
+          "message": { "label": "How can we help?", "placeholder": "Tell us about your project" }
+        },
+        "submitLabel": "Request a Free Estimate",
+        "submittingLabel": "Sending...",
+        "successMessage": "Thanks! We’ll be in touch shortly.",
+        "errorMessage": "Something went wrong. Please call us instead."
+      }
+    }
+  ]
+}

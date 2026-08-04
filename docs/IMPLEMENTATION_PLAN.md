@@ -141,30 +141,37 @@ a wrong prop for a given `type` becomes a compile error.
 
 **File:** `src/lib/sections.tsx` (new)
 
+> **Revised during implementation.** The original sketch used a component lookup table
+> with a `@ts-expect-error`. That does not work: `REGISTRY[section.type]` and
+> `section.props` resolve independently, widening to a union of components and a union
+> of props with nothing correlating them. Suppressing the error would let Hero props
+> flow into the FAQ component — discarding the exact safety the union exists to give.
+> Dispatch is a switch instead. See the comment in `src/lib/sections.tsx`.
+
+Two exports, each enforcing exhaustiveness a different way:
+
 ```tsx
-import HeroC from "@/components/sections/Hero"
-// ...
+// Runtime list, for the validator. Record<SectionType, true> makes the compiler
+// reject both a missing key and an invented one.
+const SECTION_TYPE_SET: Record<SectionType, true> = { Hero: true, /* ... */ }
+export const SECTION_TYPES = Object.keys(SECTION_TYPE_SET) as SectionType[]
+export function isSectionType(v: string): v is SectionType { /* ... */ }
 
-const REGISTRY = {
-  Hero: HeroC,
-  Services: ServicesC,
-  // ... every type in the union
-} as const
-
-export function renderSection(section: Section, key: number) {
-  const Component = REGISTRY[section.type]
-  if (!Component) throw new Error(`Unknown section type: ${section.type}`)
-  // @ts-expect-error — union narrowing across a registry lookup
-  return <Component key={key} {...section.props} />
-}
-
-export function renderSections(sections: Section[]) {
-  return sections.map(renderSection)
+// Type-safe dispatch. A switch narrows type and props together — no casts.
+export function renderSection(section: Section, key: Key): ReactElement {
+  switch (section.type) {
+    case "Hero": return <Hero key={key} {...section.props} />
+    // ... one case per section type
+    default: {
+      const unhandled: never = section   // missing case = compile error
+      throw new Error(`Unknown section type: ${JSON.stringify(unhandled)}`)
+    }
+  }
 }
 ```
 
-The registry must be exhaustive over `SectionType`. Add a type-level check so a new
-section type that isn't registered fails the build.
+Adding a section type therefore requires three edits — the props map, the type set, and
+a switch case — and omitting either of the last two fails the build.
 
 **Acceptance:** build passes; adding a type to the union without registering it breaks
 the build.
@@ -219,16 +226,30 @@ since output must stay statically prerenderable (PRD D5).
 
 **Acceptance:** `getAllPages()` returns 4 pages; build stays fully static.
 
-### 1.5 — Two new sections
+### 1.5 — New sections
 
-**Files:** `src/components/sections/Answer.tsx`, `ContactInfo.tsx` (new)
+**Files:** `src/components/sections/Answer.tsx`, `ContactInfo.tsx`, `ContactForm.tsx` (new)
 
 - `Answer` — the AEO answer-first block. Question as heading, 2–3 sentence direct answer,
   visually distinct. This is what gets cited by AI engines (PRD §6).
-- `ContactInfo` — NAP block: name, address, phone as `tel:` link, hours, service area.
-  Replaces the hardcoded markup in `contact/page.tsx`.
+- `ContactInfo` — NAP block: phone, email, service area.
+- `ContactForm` — section wrapper around the client form, so the contact page has no
+  bespoke markup left.
 
-Both trade-agnostic. Both registered in 1.2.
+All trade-agnostic. All registered in 1.2.
+
+> **Revised during implementation.** Three sections, not two. `ContactForm` was added
+> because the contact page's form could not otherwise move out of React, which 1.6
+> requires. The contact page's two-column layout became a stacked one: keeping the
+> columns would have required a single coupled `Contact` mega-section, and independent
+> sections compose better — a service page can now use `ContactForm` without `ContactInfo`.
+>
+> **Injection pattern.** `ContactInfo` needs the business NAP, which belongs to site
+> config rather than page content. Server Components cannot use React context, so
+> `SectionPropsMap` holds *content* props only and `renderSection` passes site data
+> explicitly (`<ContactInfo {...section.props} business={site.business} />`). The
+> compiler checks each injection. Any future section needing site-wide data follows
+> this pattern rather than importing content directly.
 
 ### 1.6 — Convert pages to orchestrators
 
@@ -250,7 +271,7 @@ matches the previous site.
 
 ### 1.7 — Build the content validator
 
-**Files:** `scripts/validate-content.ts` (new), `package.json`
+**Files:** `scripts/validate-content.mts` (new), `package.json`
 
 Implement every rule in PRD §4 and §7:
 
@@ -266,7 +287,7 @@ Wire it as a prebuild step:
 
 ```json
 "scripts": {
-  "validate": "tsx scripts/validate-content.ts",
+  "validate": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/validate-content.mts",
   "prebuild": "npm run validate",
   "build": "next build"
 }
@@ -277,6 +298,26 @@ Output must name the file and the rule, e.g.
 
 **Acceptance:** temporarily set a page's description to `""` → `npm run build` fails with
 a clear message. Restore it → build passes.
+
+> **Revised during implementation.** Three notes for anyone extending the validator.
+>
+> **No new dependency.** Node 26 strips types natively, so the validator runs as `.mts`
+> with no `tsx`/`ts-node`. This requires importing with explicit `.ts` extensions, which
+> in turn requires `allowImportingTsExtensions` in `tsconfig.json` — otherwise the Next
+> build's type-check pass fails even though the script itself runs fine.
+>
+> **Errors vs. warnings.** Errors fail the build; warnings print and don't. Incomplete
+> NAP data (`business.address.street`, `geo`, `hours`, `sameAs`, `licenseNumber`) and
+> 555-range phone numbers are warnings, because the framework is pre-launch and real
+> business data isn't available yet. They must become errors before a site goes live —
+> `LocalBusiness` schema is materially weaker without them.
+>
+> **Exempt paths.** Some patterns are legitimate in context: `you@example.com` is correct
+> in a form `placeholder`. Patterns carry an optional `exempt` path regex rather than
+> being dropped. Prefer narrowing a rule over deleting it.
+>
+> **`SECTION_TYPE_SET` lives in `src/lib/section-types.ts`,** not `sections.tsx`, so the
+> validator can import it without pulling React into a plain Node process.
 
 ### 1.8 — Commit
 
@@ -400,10 +441,15 @@ Give the header CTA button a real `href`. It currently links nowhere.
 **File:** `src/components/forms/ContactForm.tsx`
 
 The current implementation awaits a 600ms timer and reports success for a lead that was
-never captured. Replace with a real submission to `conversion.formEndpoint`, real error
-handling, and a redirect to `conversion.thankYouPath`.
+never captured. Replace the `submitLead()` stub with a real submission to
+`conversion.formEndpoint`, real error handling, and a redirect to
+`conversion.thankYouPath`.
 
-All labels, placeholders, and button text come from content — not literals.
+> **Partly done in Phase 1.5.** Labels, placeholders, button text, and success/error
+> messages already come from `content/pages/contact.json`, and the error branch is
+> wired. Only `submitLead()` is still a stub — it is isolated at the top of the file
+> and marked. **Do not ship a site until this is real:** the form currently tells a
+> visitor "we'll be in touch" for a lead that went nowhere.
 
 Read `node_modules/next/dist/docs/01-app/02-guides/forms.md` first.
 
