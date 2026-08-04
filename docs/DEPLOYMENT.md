@@ -33,6 +33,29 @@ safe and sufficiently verified to publish. Both must pass before a production de
 
 Vercel auto-deploys on push.
 
+## Server-only lead delivery configuration
+
+Lead-provider configuration is deployment state, not content. Configure these values in
+the hosting environment; never add them to `content/site.json`, commit them in an `.env`
+file, or prefix them with `NEXT_PUBLIC_`:
+
+| Variable | Required | Purpose |
+|---|---:|---|
+| `LEAD_DELIVERY_ENDPOINT` | Before launch | Absolute HTTP(S) endpoint that receives the lead JSON payload; use HTTPS in production |
+| `LEAD_DELIVERY_AUTHORIZATION` | Provider-dependent | Complete `Authorization` header value required by the provider |
+
+Only `src/lib/server/conversion-config.ts` reads these variables. The contact Server
+Action receives no endpoint, credential, or redirect argument from the browser. It reads
+the validated `conversion.thankYouPath` from site content on the server and redirects
+only after the provider returns a successful response.
+
+No delivery provider is configured in this repository. Until the deployment environment
+defines a real endpoint, the form returns a visitor-safe error and logs only a generated
+request ID, status category, and request duration. If the selected provider requires a
+signing secret or another credential shape, add it as a non-public deployment variable
+inside the same server-only module when the provider adapter is implemented; never place
+it in content or a Client Component.
+
 ## Post-deploy checklist
 
 - [ ] Verify Lighthouse ≥ 95 across all four categories

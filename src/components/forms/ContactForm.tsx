@@ -5,7 +5,6 @@ import { useActionState } from "react";
 import { submitContactForm, type ContactFormState } from "@/lib/actions/contact";
 import { Button } from "@/components/ui/button";
 import type { ContactFormProps } from "@/types/sections";
-import type { ConversionConfig } from "@/types/site";
 
 const INITIAL_STATE: ContactFormState = { status: "idle" };
 
@@ -16,10 +15,8 @@ export default function ContactForm({
   submitLabel,
   submittingLabel,
   errorMessage,
-  conversion,
-}: ContactFormProps & { conversion: ConversionConfig }) {
-  const submitWithRedirect = submitContactForm.bind(null, conversion.thankYouPath);
-  const [state, formAction, isPending] = useActionState(submitWithRedirect, INITIAL_STATE);
+}: ContactFormProps) {
+  const [state, formAction, isPending] = useActionState(submitContactForm, INITIAL_STATE);
 
   return (
     <div className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">

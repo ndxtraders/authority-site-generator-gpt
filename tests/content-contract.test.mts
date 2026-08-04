@@ -70,7 +70,6 @@ function baseSite() {
     conversion: {
       trackingPhone: "+12095550148",
       displayPhone: "(209) 555-0148",
-      formEndpoint: "",
       thankYouPath: "/",
       model: "considered",
     },
@@ -174,6 +173,14 @@ test("unknown conversion model fails validation", () => {
   assert.ok(isRecord(conversion));
   conversion.model = fixtureString("invalid-conversion-model.json");
   expectFailure("conversion.model", site);
+});
+
+test("lead-delivery endpoint is rejected from public content", () => {
+  const site: Record<string, unknown> = baseSite();
+  const conversion = site.conversion;
+  assert.ok(isRecord(conversion));
+  conversion.formEndpoint = "https://provider.test/leads";
+  expectFailure("Unrecognized key", site);
 });
 
 test("unknown schema name fails validation", () => {

@@ -1,7 +1,7 @@
 # Current Session
 
-**Version:** v0.5 complete; v0.5.1 H.1 complete
-**Phase:** H.2 — server-only conversion boundary is next
+**Version:** v0.5 complete; v0.5.1 H.1–H.2 complete
+**Phase:** H.3 — lead validation, timeout, and abuse controls is next
 **First market:** Modesto, CA (roofing)
 **Authorized repo:** `ndxtraders/authority-site-generator-gpt`
 
@@ -13,8 +13,9 @@ navigation. An independent production-readiness review confirmed the architectur
 clean build, then identified hardening work that must precede page and niche expansion.
 
 The PRD is now v1.1 with decisions D7–D11. `docs/IMPLEMENTATION_PLAN.md` contains Phase H,
-seven sequenced v0.5.1 tasks. H.1 now provides the shared executable content contract;
-H.2–H.7 remain. Each H task is a natural Codex session boundary.
+seven sequenced v0.5.1 tasks. H.1 provides the shared executable content contract and
+H.2 isolates lead-delivery configuration on the server; H.3–H.7 remain. Each H task is
+a natural Codex session boundary.
 
 ## Completed in the planning session
 
@@ -48,26 +49,50 @@ H.1 verification results:
 - `npm run validate` — passed, 5 pages checked; 8 existing development warnings
 - `npm run lint` — passed
 - `npx tsc --noEmit` — passed
-- `npm test` — passed, 15/15
+- `npm test` — passed, 16/16, including rejection of provider endpoints from public content
 - `npm run build` — passed, 16 routes generated (required network access for configured
   Google fonts)
 
+## Completed in H.2
+
+- Removed `formEndpoint` from public content and the executable content contract
+- Added `src/lib/server/conversion-config.ts`, marked with `server-only`, as the only
+  module that reads `LEAD_DELIVERY_ENDPOINT` and `LEAD_DELIVERY_AUTHORIZATION`
+- Removed the conversion object and bound redirect argument from the ContactForm Client
+  Component; the Server Action now reads the validated thank-you path itself
+- Replaced raw lead logging with request ID, status category, and duration only
+- Kept provider delivery as the success boundary: redirect occurs only after a successful
+  provider response
+- Documented server-only deployment configuration in `docs/DEPLOYMENT.md`
+
+H.2 verification results:
+
+- `npm run validate` — passed, 5 pages checked; 8 existing development warnings
+- `npm run lint` — passed
+- `npx tsc --noEmit` — passed
+- `npm test` — passed, 15/15
+- Sentinel production build — passed, 16 routes generated
+- Sentinel endpoint, authorization value, and environment-variable names — absent from
+  27 client static assets and 90 built HTML/RSC/text payloads
+- Live unconfigured submission — returned the visitor-safe error path; production log
+  contained only request ID, `delivery_not_configured`, and duration
+- Live mock-provider submission — provider accepted the server-only authorization value,
+  then the action returned `303 Location: /thank-you`; success log contained metadata only
+
 ## Next — exact starting point
 
-Start a fresh Codex task for **H.2 — Make the conversion boundary server-only** in
-`docs/IMPLEMENTATION_PLAN.md`. Do not start H.3 or Phase 4.
+Start a fresh Codex task for **H.3 — Validate and protect lead submission** in
+`docs/IMPLEMENTATION_PLAN.md`. Do not start H.4 or Phase 4.
 
-H.2 begins by separating display-safe conversion values from endpoint/provider
-configuration, then updating the Server Action and ContactForm boundary so the browser
-never receives the full conversion object. Preserve H.1's parser as the only content
-loader boundary.
+H.3 begins with bounded server-side field validation, then adds accessible errors,
+honeypot/timing controls, provider timeout and failure handling, and a documented
+rate-control owner. Preserve H.1's parser and H.2's server-only configuration boundary.
 
 ## Known launch blockers
 
 - Current business phone and tracking number use reserved 555 data
 - Address, postal code, geo, hours, sameAs, and licence number are incomplete
-- Form delivery is not configured and the current boundary would expose a future endpoint
-- Raw lead data is logged when delivery is not configured
+- Form delivery is not configured because no provider endpoint has been selected
 - Current trust statistics and testimonials have not been verified
 - Generated legal templates have not been reviewed by counsel
 - Review/AggregateRating schema has no verified ratings and is not entity-connected

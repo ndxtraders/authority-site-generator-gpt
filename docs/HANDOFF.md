@@ -2,7 +2,7 @@
 
 **Written:** 2026-08-04
 **Repo:** `ndxtraders/authority-site-generator-gpt`
-**State:** Phases 0–3 and H.1 complete. Start at H.2.
+**State:** Phases 0–3 and H.1–H.2 complete. Start at H.3.
 
 > **Prime Directive:** Work only in the GPT local folder and GitHub repository. The local
 > and GitHub `authority-site-generator` upstreams are protected unless Rev proactively
@@ -30,27 +30,27 @@ and PRD win — this file is a summary, not the source of truth.
 
 ---
 
-## Start here — H.2, not Phase 4
+## Start here — H.3, not Phase 4
 
-The production-readiness review found that the architecture is sound but the quality gate
-is shallower than its documentation, the conversion boundary leaks future server
-configuration into browser payloads, failed forms log raw PII, trust claims can ship
-without verification, structured-data nodes are unsafe/disconnected, and no tests or CI
-enforce the acceptance criteria.
+The production-readiness review found that the architecture is sound but lead validation
+and abuse controls remain incomplete, trust claims can ship without verification,
+structured-data nodes are unsafe/disconnected, and no tests or CI enforce the acceptance
+criteria. H.1 and H.2 have already closed the executable-content-contract and
+server-only-conversion-boundary findings.
 
 Phase H addresses those risks before the framework multiplies routes and niches:
 
 1. **H.1** — runtime schemas and strict content parsing — **complete**
-2. **H.2** — server-only conversion configuration — **next**
-3. **H.3** — lead validation, timeout, and abuse controls
+2. **H.2** — server-only conversion configuration — **complete**
+3. **H.3** — lead validation, timeout, and abuse controls — **next**
 4. **H.4** — sample/verified content states and production truth gate
 5. **H.5** — JSON-LD safety, connected entities, and indexation
 6. **H.6** — automated tests, browser checks, and GitHub CI
 7. **H.7** — documentation reconciliation and v0.5.1 release
 
-Treat each task as one Codex session. H.1 is the completed checkpoint; begin H.2 in a
+Treat each task as one Codex session. H.2 is the completed checkpoint; begin H.3 in a
 fresh session. When its acceptance checks pass, commit, update `docs/SESSION.md`, and
-stop before H.3. Do not switch sessions in the middle of a failing build or partial
+stop before H.4. Do not switch sessions in the middle of a failing build or partial
 migration.
 
 ### H.1 checkpoint
@@ -70,6 +70,22 @@ migration.
 - H.1 checks passed: validation (5 pages, 8 known warnings), lint, TypeScript, 15 tests,
   and a 16-route production build.
 
+### H.2 checkpoint
+
+- Public content now contains display-safe conversion values only; the provider endpoint
+  and authorization credential come from non-public deployment environment variables.
+- `src/lib/server/conversion-config.ts` is marked `server-only` and is the sole reader of
+  lead-provider environment variables.
+- The ContactForm Client Component receives UI copy only. The Server Action re-reads the
+  validated thank-you path and never accepts a redirect or provider setting from the client.
+- Operational form logs contain request ID, status category, and duration only. Raw name,
+  phone, email, message, endpoint, and authorization values are never logged.
+- A sentinel build passed all 16 routes; its endpoint, credential, and environment names
+  were absent from client static assets and built HTML/RSC payloads.
+- Live production-server checks covered the unconfigured error path and a successful
+  authenticated mock-provider delivery; only the successful provider response produced
+  `303 Location: /thank-you`, and both paths logged metadata only.
+
 ---
 
 ## What already exists
@@ -81,12 +97,13 @@ Phases 0–3 are done. You are extending a working framework, not starting one.
 | Content model | `content/site.json` + `content/pages/*.json` | 5 pages today: home, about, services, contact, thank-you |
 | Runtime contract | `src/lib/content-schema.ts` | Strict shared Zod schemas; TypeScript content types are inferred from them |
 | Section union | `src/types/sections.ts` | Re-exports schema-inferred `SectionPropsMap`, `Section`, and `SectionType` |
-| Section dispatch | `src/lib/sections.tsx` | Exhaustive switch — **do not convert to a lookup table**, read the file's own comment first. Also the injection point for site-wide data (`business`, `conversion`) into section props that need more than their JSON content |
+| Section dispatch | `src/lib/sections.tsx` | Exhaustive switch — **do not convert to a lookup table**, read the file's own comment first. Also the injection point for display-safe site-wide data into sections that need more than their JSON content |
 | Content loader | `src/lib/content.ts` | The only module that knows where content lives. Parses static imports through the shared contract. **Still a static `PAGES` map — see "The one architectural thing" below** |
 | Validator | `scripts/validate-content.mts` | Uses the shared bundle parser and gates `next build` via `prebuild`; errors fail, development warnings print only |
 | Metadata | `src/lib/metadata.ts` | `buildPageMetadata(page)` — every page has a unique title/description/canonical |
 | Schema engine | `src/lib/schema/` | `buildSchema(page, site)` — LocalBusiness + BreadcrumbList always; FAQPage/Review conditional on section presence; WebSite/Service on `page.schema` opt-in |
-| Conversion config | `src/types/site.ts` → `ConversionConfig`, `content/site.json` → `conversion` block | `trackingPhone`/`displayPhone` for `tel:` links, `formEndpoint` (empty — see stubs), `thankYouPath`, `model` |
+| Public conversion config | `src/types/site.ts` → `ConversionConfig`, `content/site.json` → `conversion` block | Display-safe `trackingPhone`, `displayPhone`, `thankYouPath`, and `model` only |
+| Server conversion config | `src/lib/server/conversion-config.ts` | Reads non-public `LEAD_DELIVERY_ENDPOINT` and optional `LEAD_DELIVERY_AUTHORIZATION`; never import into a Client Component |
 | Click-to-call | `src/components/common/CallLink.tsx` | Plain `<a href="tel:...">`, styled via `buttonVariants()` where it needs to look like a button — **not** `Button`'s `render` prop (injects `role="button"` onto real links, wrong) |
 | Contact form | `src/components/forms/ContactForm.tsx` + `src/lib/actions/contact.ts` | Server Action + `useActionState`, the framework's own idiomatic pattern per `forms.md`. Redirects to `conversion.thankYouPath` on success |
 | Legal pages | `src/lib/legal.ts` + `src/app/(legal)/[slug]/page.tsx` | Generated templates, real business fields only, **not legal-reviewed** |
@@ -223,11 +240,11 @@ not per-niche forks), which is Rev's call, not yours.
 
 ## Stubs that must not ship — tracked in `docs/SESSION.md`, kept here for visibility
 
-1. **`conversion.formEndpoint` is empty.** No lead-delivery provider (email/CRM) is
-   wired up yet. The Server Action (`src/lib/actions/contact.ts`) is honest about this —
-   it returns a real error instead of a fake success — but no lead submitted through the
-   live form is delivered anywhere. Someone needs to pick a provider and set this before
-   launch. Not a Phase 4 task; flagging so it doesn't get lost.
+1. **Lead delivery is not configured.** No lead-delivery provider (email/CRM) is wired
+   up yet. The Server Action (`src/lib/actions/contact.ts`) reads its endpoint only from
+   server deployment configuration and returns a real error when absent, but no lead
+   submitted through the live form is delivered anywhere. Someone needs to pick a
+   provider and set the documented deployment variables before launch.
 2. **Legal pages need real legal review.** `src/lib/legal.ts` generates from real
    business fields only, no fabricated claims — but it's a template, not counsel-reviewed
    content.
@@ -245,9 +262,9 @@ not per-niche forks), which is Rev's call, not yours.
 6. **Runtime content validation was completed in H.1.** Keep
    `src/lib/content-schema.ts` as the single parser/type source and do not reintroduce
    loader casts.
-7. **Future form configuration crosses the client boundary.** The ContactForm Client
-   Component receives the full conversion object, and the unconfigured failure path logs
-   raw lead fields. H.2 removes both behaviors.
+7. **The form configuration boundary was completed in H.2.** Preserve the server-only
+   environment module, client action signature, validated server-side redirect, and
+   metadata-only operational logs.
 8. **Lead abuse and failure controls are incomplete.** There are no maximum lengths,
    provider timeout, bot trap, or documented rate-control owner. H.3.
 9. **Current proof and testimonial content is not verified.** The development sample

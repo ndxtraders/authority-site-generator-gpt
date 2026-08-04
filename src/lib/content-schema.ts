@@ -31,7 +31,6 @@ const siteOrigin = absoluteUrl.refine(
   { message: "must be an absolute HTTP(S) origin without a path or trailing slash" },
 );
 
-const optionalAbsoluteUrl = z.union([z.literal(""), absoluteUrl]);
 const optionalCoordinate = (minimum: number, maximum: number) =>
   z.string().refine(
     (value) => {
@@ -361,7 +360,6 @@ export const SiteConfigSchema = z
           message: "must be an E.164 phone number",
         }),
         displayPhone: nonEmptyString,
-        formEndpoint: optionalAbsoluteUrl,
         thankYouPath: rootRelativePath,
         model: z.enum(["emergency", "considered", "mixed"]),
       })

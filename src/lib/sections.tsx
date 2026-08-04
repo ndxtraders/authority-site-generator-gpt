@@ -66,7 +66,7 @@ export function renderSection(section: Section, key: Key, site: SiteConfig): Rea
     case "ContactInfo":
       return <ContactInfo key={key} {...section.props} business={site.business} />;
     case "ContactForm":
-      return <ContactFormSection key={key} {...section.props} conversion={site.conversion} />;
+      return <ContactFormSection key={key} {...section.props} />;
     default: {
       // Unreachable when the switch is exhaustive. Reached only if JSON content
       // carries a type the compiler never saw — the validator's job to prevent.
