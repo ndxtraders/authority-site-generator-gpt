@@ -1,18 +1,17 @@
 # Current Session
 
-**Version:** v0.3 complete
-**Phase:** Implementation Plan Phases 0 and 1 done; Phase 2 (SEO engine) next
+**Version:** v0.4 complete
+**Phase:** Implementation Plan Phases 0–2 done; Phase 3 (conversion layer) next
 **First market:** Modesto, CA (roofing)
 
 ## Where we are
 
-The framework has a working reusable section layer: nine trade-agnostic components built
-on `Container` / `Section` / `SectionHeading`, driven by a typed content model. The
-homepage is pure orchestration. The build passes and prerenders 8 static routes.
-
-An audit on 2026-08-03 found 25 defects, all logged in `IMPLEMENTATION_PLAN.md`. The
-most serious: every page emits the homepage canonical, so three of four pages are telling
-Google not to index them.
+The framework has a working reusable section layer, a page-based content model with a
+build-time validator, and now a real SEO/schema engine: every page carries a unique
+title, description, and self-referencing canonical; JSON-LD is generated per page from
+content rather than one hardcoded literal; sitemap/robots/manifest/llms.txt all derive
+from content. Build passes, 8 static routes, tsc and lint clean, zero business strings
+in `src/`.
 
 ## Completed this session
 
@@ -23,28 +22,27 @@ Google not to index them.
 - Wrote `FRAMEWORK_PRD.md` and `IMPLEMENTATION_PLAN.md`
 - Migrated the working tree into `authority-site-generator`
 - Archived dead code; rebuilt the documentation layer
-
 - Phase 1 (v0.3) complete: content model, section registry, loader, validator
+- Phase 2 (v0.4) complete: metadata, schema generator, generated sitemap/robots/manifest,
+  llms.txt — see three revision notes in the plan (2.4's zero-code-change bar deferred to
+  Phase 4; 2.5's `force-static` requirement for Route Handlers; the testimonial-rating
+  content-model gap in the changelog)
 
 ## Next
 
-Phase 2 (v0.4) — the SEO engine. Highest-value item is 2.2: every page still emits the
-home page's canonical, so three of four pages tell Google not to index them. Page content
-already carries the correct per-page `seo` block; it just needs wiring through
-`generateMetadata`.
-
-Then 2.3 (schema generator), 2.4 (generated sitemap/robots/manifest), 2.5 (`llms.txt`).
-
-See `IMPLEMENTATION_PLAN.md`. Phases 2–6 are suitable for Sonnet; the plan carries
-acceptance checks and revision notes for each.
+Phase 3 (v0.5) — the conversion layer: click-to-call, the real `submitLead()`, legal
+pages, mobile navigation. See `IMPLEMENTATION_PLAN.md`.
 
 ## Known stubs — do not ship a live site yet
 
 - `submitLead()` in `ContactForm` is simulated. The form reports success for a lead that
-  was never captured.
+  was never captured. Phase 3.3.
 - `business.address`, `geo`, `hours`, `sameAs`, and `licenseNumber` are empty, and the
   phone is a 555 placeholder. The validator warns on all six; they must become errors
   before launch.
+- `TestimonialItem.rating` is optional and currently unset on every testimonial, so
+  `Review`/`AggregateRating` schema is not emitted. Needs real ratings from the business,
+  not a placeholder value.
 
 ## Repo note
 

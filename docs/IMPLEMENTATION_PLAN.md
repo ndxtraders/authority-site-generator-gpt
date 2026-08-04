@@ -396,12 +396,32 @@ hand-maintained array. `manifest.ts` pulls name, description, and `theme_color` 
 
 **Acceptance:** add a page file → it appears in `sitemap.xml` with no code change.
 
+> **Revised during implementation.** The literal acceptance check does not hold yet, and
+> cannot until Phase 4. `getAllPages()` (Phase 1.4) is a static-import map, documented in
+> `content.ts` as deferred to Phase 4's directory enumeration — adding a page file still
+> requires one import and one map entry *in `content.ts`*.
+>
+> What 2.4 actually delivers, verified: `sitemap.ts`, `robots.ts`, and `manifest.ts` now
+> derive from that same single source (`getAllPages()` / `getSite()`) instead of each
+> maintaining its own separate hardcoded list. Tested directly — added a fifth page to
+> `content.ts`, confirmed it appeared in `sitemap.xml`, and confirmed the three `src/app`
+> files needed zero changes. That's defect #6 fixed: one list to maintain, not three that
+> can drift from each other. The zero-code-change bar is Phase 4's, not this task's.
+
 ### 2.5 — llms.txt
 
 **File:** `src/app/llms.txt/route.ts`
 
 Generate an AI-crawler map from the content tree: site purpose, service area, page list
 with one-line descriptions.
+
+> **Revised during implementation.** Route Handlers are dynamic by default — unlike
+> `sitemap.ts`/`robots.ts`, which the docs special-case as "static unless they use
+> request-time APIs," a plain `route.ts` renders `ƒ (Dynamic)` even with zero
+> request-time data, which the build output caught immediately. Fixed with
+> `export const dynamic = "force-static"`, confirmed it flips to `○ (Static)`. Any future
+> `route.ts` in this framework needs the same line — it's easy to miss since nothing
+> errors, the route just quietly stops being static.
 
 ### 2.6 — Commit
 

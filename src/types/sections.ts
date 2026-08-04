@@ -28,6 +28,14 @@ export interface TestimonialItem {
   quote: string;
   author: string;
   role: string;
+  /**
+   * Star rating out of 5, if the business actually collected one. Optional and
+   * omitted by default — do not backfill a placeholder value. Review and
+   * AggregateRating schema (PRD §6) are only emitted for testimonials that
+   * carry a real rating; fabricating one would be a false structured-data
+   * claim about a real business. See `src/lib/schema/review.ts`.
+   */
+  rating?: number;
 }
 
 export interface FAQItem {

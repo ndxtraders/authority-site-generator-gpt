@@ -1,11 +1,13 @@
 import type { MetadataRoute } from "next";
 
+import { absoluteUrl } from "@/lib/url";
+
 export default function robots(): MetadataRoute.Robots {
   return {
     rules: {
       userAgent: "*",
       allow: "/",
     },
-    sitemap: "https://roofrepairmodesto.com/sitemap.xml",
+    sitemap: absoluteUrl("/sitemap.xml"),
   };
 }
