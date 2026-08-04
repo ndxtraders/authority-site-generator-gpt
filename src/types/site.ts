@@ -63,6 +63,29 @@ export interface SchemaConfig {
   businessType: string;
 }
 
+export interface ConversionConfig {
+  /**
+   * E.164 format (e.g. "+12095550148"), used verbatim in `tel:` hrefs.
+   * Distinct from `business.phone` so a real deployment can configure a call
+   * tracking number without changing the business's official NAP record used
+   * in schema and legal pages (PRD §8).
+   */
+  trackingPhone: string;
+  /** Human-readable formatted version of trackingPhone, shown in UI text. */
+  displayPhone: string;
+  /**
+   * Where a validated lead is forwarded once real delivery (email/CRM) is
+   * wired up. Empty until a provider is chosen — see
+   * `src/lib/actions/contact.ts`. Not a URL the browser calls directly; the
+   * form submits via a Server Action, not fetch.
+   */
+  formEndpoint: string;
+  /** Root-relative path the form redirects to on success. */
+  thankYouPath: string;
+  /** Selects the CTA pattern a niche pack uses (PRD §8). Not yet consumed. */
+  model: "emergency" | "considered" | "mixed";
+}
+
 export interface SiteConfig {
   /** Canonical origin, no trailing slash. The only place the domain appears. */
   url: string;
@@ -71,4 +94,5 @@ export interface SiteConfig {
   navigation: Navigation;
   footer: FooterConfig;
   schema: SchemaConfig;
+  conversion: ConversionConfig;
 }

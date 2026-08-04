@@ -44,7 +44,7 @@ export { SECTION_TYPES, isSectionType } from "@/lib/section-types";
 export function renderSection(section: Section, key: Key, site: SiteConfig): ReactElement {
   switch (section.type) {
     case "Hero":
-      return <Hero key={key} {...section.props} />;
+      return <Hero key={key} {...section.props} conversion={site.conversion} />;
     case "Services":
       return <Services key={key} {...section.props} />;
     case "WhyChooseUs":
@@ -58,7 +58,7 @@ export function renderSection(section: Section, key: Key, site: SiteConfig): Rea
     case "FAQ":
       return <FAQ key={key} {...section.props} />;
     case "CTA":
-      return <CTA key={key} {...section.props} />;
+      return <CTA key={key} {...section.props} conversion={site.conversion} />;
     case "Authority":
       return <Authority key={key} {...section.props} />;
     case "Answer":
@@ -66,7 +66,7 @@ export function renderSection(section: Section, key: Key, site: SiteConfig): Rea
     case "ContactInfo":
       return <ContactInfo key={key} {...section.props} business={site.business} />;
     case "ContactForm":
-      return <ContactFormSection key={key} {...section.props} />;
+      return <ContactFormSection key={key} {...section.props} conversion={site.conversion} />;
     default: {
       // Unreachable when the switch is exhaustive. Reached only if JSON content
       // carries a type the compiler never saw — the validator's job to prevent.

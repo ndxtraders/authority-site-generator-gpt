@@ -42,7 +42,6 @@
         },
         "submitLabel": "Request a Free Estimate",
         "submittingLabel": "Sending...",
-        "successMessage": "Thanks! We’ll be in touch shortly.",
         "errorMessage": "Something went wrong. Please call us instead."
       }
     }

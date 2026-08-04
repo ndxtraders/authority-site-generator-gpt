@@ -3,6 +3,7 @@ import homePage from "../../content/pages/home.json";
 import aboutPage from "../../content/pages/about.json";
 import servicesPage from "../../content/pages/services.json";
 import contactPage from "../../content/pages/contact.json";
+import thankYouPage from "../../content/pages/thank-you.json";
 
 import type { PageContent, PageType } from "@/types/page";
 import type { SiteConfig } from "@/types/site";
@@ -29,6 +30,7 @@ const PAGES = {
   about: aboutPage as unknown as PageContent,
   services: servicesPage as unknown as PageContent,
   contact: contactPage as unknown as PageContent,
+  "thank-you": thankYouPage as unknown as PageContent,
 } satisfies Record<string, PageContent>;
 
 export type KnownPageSlug = keyof typeof PAGES;

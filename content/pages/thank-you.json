@@ -1,0 +1,30 @@
+{
+  "slug": "thank-you",
+  "pageType": "thank-you",
+  "seo": {
+    "title": "Thank You | Roof Repair Modesto",
+    "description": "Your request has been received. Roof Repair Modesto will follow up shortly.",
+    "canonicalPath": "/thank-you"
+  },
+  "schema": [],
+  "internalLinks": ["/services", "/about"],
+  "sections": [
+    {
+      "type": "Answer",
+      "props": {
+        "question": "Thanks — we've got your request",
+        "answer": "A member of our team will follow up shortly. If your issue is urgent, call us directly and we'll pick up."
+      }
+    },
+    {
+      "type": "ContactInfo",
+      "props": {
+        "title": "Need us sooner?",
+        "description": "Reach out directly and we'll get back to you right away.",
+        "phoneLabel": "Phone",
+        "emailLabel": "Email",
+        "areaLabel": "Service Area"
+      }
+    }
+  ]
+}

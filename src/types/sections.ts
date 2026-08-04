@@ -134,7 +134,7 @@ export interface ContactFormProps {
   };
   submitLabel: string;
   submittingLabel: string;
-  successMessage: string;
+  /** Fallback shown when the server action fails without a specific message. */
   errorMessage: string;
 }
 

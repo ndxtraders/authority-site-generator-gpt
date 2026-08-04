@@ -445,6 +445,12 @@ with one-line descriptions.
 }
 ```
 
+> **Revised during implementation.** `formEndpoint` shipped as `""`, not a placeholder
+> URL — no lead-delivery provider (email/CRM) has been chosen yet, and a fake URL would
+> silently 404 or, worse, look configured when it isn't. `submitContactForm` (3.3) checks
+> for this and returns a real "not connected yet" error instead of pretending to submit.
+> Wire a real provider in before launch.
+
 ### 3.2 — Click-to-call
 
 **Files:** `Header.tsx`, `Footer.tsx`, `Hero.tsx`, `CTA.tsx`, `src/components/common/CallLink.tsx` (new)
@@ -454,7 +460,15 @@ hero, footer, and inline in long-form sections.
 
 Give the header CTA button a real `href`. It currently links nowhere.
 
-**Acceptance:** `grep -c 'href="tel:' .next/server/app/index.html` ≥ 2.
+**Acceptance:** `grep -c 'href="tel:' .next/server/app/index.html` ≥ 2. Verified: 4.
+
+> **Revised during implementation.** `CallLink` and the header CTA are styled with
+> `buttonVariants()` applied directly to `Link`/`<a>`, not `Button`'s `render` prop.
+> Reading base-ui's `useButton.js` showed `render` injects `role="button"` onto whatever
+> it wraps — correct for a `render`ed `<div>` acting as a button, wrong for a real
+> navigational `<a href>`, which should keep announcing as a link. `buttonVariants()` is
+> just the `cva()` className function, already exported from `button.tsx` for exactly
+> this kind of composition.
 
 ### 3.3 — Make the form real
 
@@ -476,6 +490,19 @@ Read `node_modules/next/dist/docs/01-app/02-guides/forms.md` first.
 **Acceptance:** submitting produces a real network request; failure shows an error; success
 navigates to the thank-you page.
 
+> **Revised during implementation.** Built as a Server Action (`src/lib/actions/contact.ts`)
+> with `useActionState`, not a Route Handler + `fetch()` — `forms.md` names this the
+> framework's own idiomatic pattern for exactly this case, confirmed before writing any
+> code. `redirect(conversion.thankYouPath)` is called outside any try/catch, since Next
+> implements it as an internal throw. `submitLead()`'s old 600ms-timer stub is gone; the
+> new action validates required fields, then checks `conversion.formEndpoint` — empty
+> today (see 3.1's revision note), so it returns a real error rather than the old fake
+> success. `successMessage` was dropped from `ContactFormProps` and
+> `content/pages/contact.json`: success now navigates away via `redirect()`, so there is
+> no local success state left to display a message in. Added `content/pages/thank-you.json`
+> and `"thank-you"` to `PageType` and `content.ts`'s `PAGES` map to give the redirect a
+> real destination.
+
 ### 3.4 — Legal page generator
 
 **Files:** `src/app/(legal)/[slug]/page.tsx`, `src/lib/legal.ts` (new)
@@ -484,6 +511,13 @@ Generate `privacy-policy`, `terms-conditions`, `disclaimer`, `accessibility` fro
 templates populated with `business` fields. Never hand-authored.
 
 *Rationale:* the locksmith reference site carries six such pages; this framework has zero.
+
+> **Flag, not a revision.** `src/lib/legal.ts` generates all four pages from generic,
+> standard boilerplate populated only with real `SiteConfig` fields (`business.name`,
+> `.email`, `.phone`, `.state`, `site.url`) — no fabricated compliance certifications, no
+> invented retention periods, no legal advice. **This is a template, not a substitute for
+> legal review.** Do not ship a live site on the generated text alone; see the note added
+> to `docs/SESSION.md`.
 
 ### 3.5 — Mobile navigation
 
@@ -494,6 +528,15 @@ Nav is currently `hidden md:flex` with no fallback — **there is no navigation 
 closes on selection.
 
 **Acceptance:** keyboard-only navigation works at 375px width.
+
+> **Partially verified.** Built as `src/components/layout/MobileNav.tsx`, a client
+> component isolated from `Header` (which stays a Server Component) — native `<button>`
+> and `<Link>` elements throughout, so Tab/Enter/Space work without custom key handling;
+> `aria-expanded`/`aria-controls` wired to a real `id`; closes on Escape and on link
+> click. Confirmed in the built HTML: collapsed state renders `aria-expanded="false"`,
+> `aria-controls="mobile-nav-menu"`. **Not confirmed in an actual browser** — no browser
+> automation tool was available in this session to drive a real keyboard-only pass at
+> 375px. Do this manually before shipping.
 
 ### 3.6 — Commit
 

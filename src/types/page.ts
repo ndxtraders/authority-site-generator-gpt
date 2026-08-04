@@ -13,7 +13,8 @@ export type PageType =
   | "service"
   | "location"
   | "faq"
-  | "legal";
+  | "legal"
+  | "thank-you";
 
 /** schema.org graphs a page opts into. Others are added automatically. */
 export type SchemaGraph =

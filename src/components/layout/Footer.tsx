@@ -1,4 +1,15 @@
+import Link from "next/link";
+
 import { getSite } from "@/lib/content";
+import { LEGAL_SLUGS } from "@/lib/legal";
+import CallLink from "@/components/common/CallLink";
+
+const LEGAL_LABELS: Record<(typeof LEGAL_SLUGS)[number], string> = {
+  "privacy-policy": "Privacy Policy",
+  "terms-conditions": "Terms & Conditions",
+  disclaimer: "Disclaimer",
+  accessibility: "Accessibility",
+};
 
 export default function Footer() {
   const site = getSite();
@@ -13,10 +24,18 @@ export default function Footer() {
         </p>
 
         <div className="mt-8 flex flex-col gap-2 text-sm text-slate-400 sm:flex-row sm:items-center sm:gap-6">
-          <span>{site.business.phone}</span>
+          <CallLink conversion={site.conversion} className="hover:text-white" />
           <span>{site.business.email}</span>
           <span>{site.business.region}</span>
         </div>
+
+        <nav className="mt-8 flex flex-wrap gap-x-6 gap-y-2 text-sm text-slate-500">
+          {LEGAL_SLUGS.map((slug) => (
+            <Link key={slug} href={`/${slug}`} className="hover:text-slate-300">
+              {LEGAL_LABELS[slug]}
+            </Link>
+          ))}
+        </nav>
 
         <p className="mt-10 text-sm text-slate-500">{site.footer.copyright}</p>
       </div>

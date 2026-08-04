@@ -1,13 +1,15 @@
 import Link from "next/link";
 
 import { getSite } from "@/lib/content";
-import { Button } from "@/components/ui/button";
+import CallLink from "@/components/common/CallLink";
+import MobileNav from "@/components/layout/MobileNav";
+import { buttonVariants } from "@/components/ui/button";
 
 export default function Header() {
   const site = getSite();
 
   return (
-    <header className="border-b border-slate-200 bg-white/95 backdrop-blur">
+    <header className="relative border-b border-slate-200 bg-white/95 backdrop-blur">
       <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-6 lg:px-8">
         <div>
           <Link href="/" className="text-xl font-semibold tracking-tight text-slate-900">
@@ -27,7 +29,14 @@ export default function Header() {
           ))}
         </nav>
 
-        <Button>{site.navigation.cta}</Button>
+        <div className="hidden items-center gap-4 md:flex">
+          <CallLink conversion={site.conversion} className="text-sm font-medium text-slate-600 hover:text-slate-900" />
+          <Link href="/contact" className={buttonVariants()}>
+            {site.navigation.cta}
+          </Link>
+        </div>
+
+        <MobileNav links={site.navigation.links} cta={site.navigation.cta} conversion={site.conversion} />
       </div>
     </header>
   );

@@ -1,5 +1,39 @@
 # Changelog
 
+## v0.5 — Conversion layer
+
+- Added `conversion` block to `SiteConfig`/`content/site.json` — `trackingPhone`
+  (E.164, used in `tel:` hrefs), `displayPhone`, `formEndpoint`, `thankYouPath`, `model`.
+  Kept distinct from `business.phone` (official NAP, used in schema/legal) per PRD §8's
+  call-tracking rationale
+- Added `CallLink` (`src/components/common/CallLink.tsx`) — real `tel:` links in
+  header, footer, `Hero`, and `CTA`; primary CTAs now link to `/contact` instead of
+  going nowhere. Styled with `buttonVariants()` directly rather than `Button`'s `render`
+  prop, which would incorrectly add `role="button"` to a real navigational link
+- Made the contact form real: `src/lib/actions/contact.ts` is a Server Action
+  (`useActionState`, idiomatic per the framework's own docs) that validates input and
+  redirects to `conversion.thankYouPath` on success. Replaces the old `submitLead()`
+  stub that reported success for a lead that was never captured. `formEndpoint` is
+  empty until a delivery provider is chosen, so submission currently returns an honest
+  "not connected yet" error rather than a fake success — **do not ship until this is
+  wired to a real inbox/CRM**
+- Added `/thank-you` page (`content/pages/thank-you.json`, `"thank-you"` `PageType`)
+- Added the legal page generator (`src/lib/legal.ts`,
+  `src/app/(legal)/[slug]/page.tsx`) — `privacy-policy`, `terms-conditions`,
+  `disclaimer`, `accessibility`, generated from generic templates populated only with
+  real `business`/`site` fields. **Template only, not a substitute for legal review.**
+  Linked from the footer and included in `sitemap.ts`
+- Added mobile navigation (`src/components/layout/MobileNav.tsx`) — the header had no
+  navigation at all below 768px; now an accessible disclosure toggle with
+  `aria-expanded`/`aria-controls`, closes on Escape and on link selection
+
+**Fixed:** defects 14 (form submission), plus the header CTA/no-`tel:`/no-mobile-nav/
+no-legal-pages gaps tracked as "still open" since v0.2.
+
+**Known gap, not yet actionable:** `conversion.formEndpoint` has no real provider
+configured. The Server Action is honest about this (it errors rather than fakes
+success), but no lead sent through the live form is actually delivered anywhere yet.
+
 ## v0.4 — SEO and schema engine
 
 - Added `src/lib/url.ts` — `site.url` is now the only place the domain appears

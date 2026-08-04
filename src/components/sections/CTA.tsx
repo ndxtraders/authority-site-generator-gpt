@@ -1,9 +1,20 @@
+import Link from "next/link";
+
+import CallLink from "@/components/common/CallLink";
 import Container from "@/components/common/Container";
 import Section from "@/components/common/Section";
-import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import type { CTAProps } from "@/types/sections";
+import type { ConversionConfig } from "@/types/site";
 
-export default function CTA({ eyebrow, title, description, primaryButton, secondaryButton }: CTAProps) {
+export default function CTA({
+  eyebrow,
+  title,
+  description,
+  primaryButton,
+  secondaryButton,
+  conversion,
+}: CTAProps & { conversion: ConversionConfig }) {
   return (
     <Section id="cta" className="bg-slate-900">
       <Container>
@@ -13,10 +24,19 @@ export default function CTA({ eyebrow, title, description, primaryButton, second
           <p className="mx-auto mt-4 max-w-2xl text-lg leading-8 text-slate-300">{description}</p>
 
           <div className="mt-10 flex flex-col justify-center gap-4 sm:flex-row">
-            <Button size="lg">{primaryButton}</Button>
-            <Button size="lg" variant="outline" className="border-white/20 bg-white/10 text-white hover:bg-white/20">
+            <Link href="/contact" className={buttonVariants({ size: "lg" })}>
+              {primaryButton}
+            </Link>
+            <CallLink
+              conversion={conversion}
+              className={buttonVariants({
+                size: "lg",
+                variant: "outline",
+                className: "border-white/20 bg-white/10 text-white hover:bg-white/20",
+              })}
+            >
               {secondaryButton}
-            </Button>
+            </CallLink>
           </div>
         </div>
       </Container>

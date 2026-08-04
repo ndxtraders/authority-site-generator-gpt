@@ -44,5 +44,12 @@
   },
   "schema": {
     "businessType": "RoofingContractor"
+  },
+  "conversion": {
+    "trackingPhone": "+12095550148",
+    "displayPhone": "(209) 555-0148",
+    "formEndpoint": "",
+    "thankYouPath": "/thank-you",
+    "model": "considered"
   }
 }

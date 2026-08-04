@@ -1,6 +1,10 @@
+import Link from "next/link";
+
+import CallLink from "@/components/common/CallLink";
 import Container from "@/components/common/Container";
-import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import type { HeroProps } from "@/types/sections";
+import type { ConversionConfig } from "@/types/site";
 
 export default function Hero({
   eyebrow,
@@ -8,7 +12,8 @@ export default function Hero({
   subheadline,
   primaryButton,
   secondaryButton,
-}: HeroProps) {
+  conversion,
+}: HeroProps & { conversion: ConversionConfig }) {
   return (
     <section className="bg-[radial-gradient(circle_at_top,_rgba(59,130,246,0.12),_transparent_50%)] bg-slate-50">
       <Container className="py-24 sm:py-32 lg:py-40">
@@ -26,10 +31,12 @@ export default function Hero({
           </p>
 
           <div className="mt-10 flex flex-col gap-4 sm:flex-row">
-            <Button size="lg">{primaryButton}</Button>
-            <Button size="lg" variant="outline">
+            <Link href="/contact" className={buttonVariants({ size: "lg" })}>
+              {primaryButton}
+            </Link>
+            <CallLink conversion={conversion} className={buttonVariants({ size: "lg", variant: "outline" })}>
               {secondaryButton}
-            </Button>
+            </CallLink>
           </div>
         </div>
       </Container>

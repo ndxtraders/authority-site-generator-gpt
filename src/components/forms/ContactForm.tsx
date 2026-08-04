@@ -1,21 +1,13 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { useActionState } from "react";
 
+import { submitContactForm, type ContactFormState } from "@/lib/actions/contact";
 import { Button } from "@/components/ui/button";
 import type { ContactFormProps } from "@/types/sections";
+import type { ConversionConfig } from "@/types/site";
 
-/**
- * Lead capture form.
- *
- * NOTE: submission is still simulated — it does not post anywhere. Phase 3.3 of
- * the implementation plan replaces `submitLead` with a real request to
- * `conversion.formEndpoint`. Until then this form must not be shipped to a live
- * site, because it reports success for a lead that was never captured.
- */
-async function submitLead(): Promise<void> {
-  await new Promise((resolve) => setTimeout(resolve, 600));
-}
+const INITIAL_STATE: ContactFormState = { status: "idle" };
 
 export default function ContactForm({
   title,
@@ -23,29 +15,18 @@ export default function ContactForm({
   fields,
   submitLabel,
   submittingLabel,
-  successMessage,
   errorMessage,
-}: ContactFormProps) {
-  const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
-
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setStatus("submitting");
-
-    try {
-      await submitLead();
-      setStatus("success");
-    } catch {
-      setStatus("error");
-    }
-  }
+  conversion,
+}: ContactFormProps & { conversion: ConversionConfig }) {
+  const submitWithRedirect = submitContactForm.bind(null, conversion.thankYouPath);
+  const [state, formAction, isPending] = useActionState(submitWithRedirect, INITIAL_STATE);
 
   return (
     <div className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
       <h2 className="text-2xl font-semibold text-slate-900">{title}</h2>
       <p className="mt-3 text-sm leading-7 text-slate-600">{description}</p>
 
-      <form onSubmit={handleSubmit} className="mt-8 space-y-4">
+      <form action={formAction} className="mt-8 space-y-4">
         <div className="grid gap-4 md:grid-cols-2">
           <label className="text-sm font-medium text-slate-700">
             <span>{fields.name.label}</span>
@@ -89,14 +70,13 @@ export default function ContactForm({
           />
         </label>
 
-        <Button type="submit" className="w-full sm:w-auto" disabled={status === "submitting"}>
-          {status === "submitting" ? submittingLabel : submitLabel}
+        <Button type="submit" className="w-full sm:w-auto" disabled={isPending}>
+          {isPending ? submittingLabel : submitLabel}
         </Button>
 
-        {status === "success" ? (
-          <p className="text-sm text-green-700">{successMessage}</p>
+        {state.status === "error" ? (
+          <p className="text-sm text-red-700">{state.message ?? errorMessage}</p>
         ) : null}
-        {status === "error" ? <p className="text-sm text-red-700">{errorMessage}</p> : null}
       </form>
     </div>
   );

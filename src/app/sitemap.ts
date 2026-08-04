@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 
-import { getAllPages } from "@/lib/content";
+import { getAllPages, getSite } from "@/lib/content";
+import { getAllLegalPages } from "@/lib/legal";
 import { absoluteUrl } from "@/lib/url";
 
 /**
@@ -8,9 +9,14 @@ import { absoluteUrl } from "@/lib/url";
  * page file appears here automatically. `getAllPages()` is a static import
  * map today (Phase 1) and becomes real directory enumeration once dynamic
  * `[slug]` routes exist (Phase 4); this file does not change either way.
+ *
+ * Legal pages are generated rather than authored (`src/lib/legal.ts`), so they
+ * are enumerated separately rather than living in `getAllPages()`.
  */
 export default function sitemap(): MetadataRoute.Sitemap {
-  return getAllPages().map((page) => ({
+  const pages = [...getAllPages(), ...getAllLegalPages(getSite()).map((legal) => legal.page)];
+
+  return pages.map((page) => ({
     url: absoluteUrl(page.seo.canonicalPath),
     lastModified: new Date(),
   }));
