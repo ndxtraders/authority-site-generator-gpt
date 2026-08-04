@@ -1,22 +1,24 @@
 /**
- * Content validator — the anti-thin gate.
+ * Content validator — runtime contract plus the anti-thin quality gate.
  *
  * Runs as `prebuild`, so a content defect fails the build rather than shipping.
- * Every rule here exists because the defect it catches was found in real output:
- * the reference locksmith site shipped "Modesto, Fl" on all 20 pages, eight
- * "Content coming soon" pages, and a placeholder phone number; this framework
- * shipped four pages all claiming the home page as canonical.
- *
- * Errors fail the build. Warnings are printed and do not.
+ * Runtime shape, format, and relationship rules live in `content-schema.ts` and
+ * are shared with the Next loader. This file adds authored-content quality rules
+ * and development warnings.
  *
  * Run directly: `npm run validate`
  */
 
-import { readFileSync, readdirSync, existsSync } from "node:fs";
-import { join, dirname } from "node:path";
+import { existsSync, readFileSync, readdirSync } from "node:fs";
+import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { isSectionType, SECTION_TYPES } from "../src/lib/section-types.ts";
+import {
+  ContentContractError,
+  parseContentBundle,
+  type PageContent,
+  type RawPageRecord,
+} from "../src/lib/content-schema.ts";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const CONTENT = join(ROOT, "content");
@@ -61,11 +63,7 @@ const SUSPICIOUS_PATTERNS: Array<[RegExp, string]> = [
   [/\b\d{3}-555-\d{4}\b/, "phone number uses the 555 reserved range"],
 ];
 
-function scanStrings(
-  value: unknown,
-  file: string,
-  path = "",
-): void {
+function scanStrings(value: unknown, file: string, path = ""): void {
   if (typeof value === "string") {
     for (const { pattern, label, exempt } of PLACEHOLDER_PATTERNS) {
       if (exempt?.test(path)) continue;
@@ -77,7 +75,7 @@ function scanStrings(
     return;
   }
   if (Array.isArray(value)) {
-    value.forEach((item, i) => scanStrings(item, file, `${path}[${i}]`));
+    value.forEach((item, index) => scanStrings(item, file, `${path}[${index}]`));
     return;
   }
   if (value && typeof value === "object") {
@@ -88,15 +86,18 @@ function scanStrings(
 }
 
 // ---------------------------------------------------------------------------
-// Load
+// Load and parse through the shared executable contract
 // ---------------------------------------------------------------------------
 
-function readJson(path: string): Record<string, unknown> {
+let hasInvalidJson = false;
+
+function readJson(path: string): unknown {
   try {
     return JSON.parse(readFileSync(path, "utf8"));
   } catch (cause) {
+    hasInvalidJson = true;
     errors.push(`${path} — invalid JSON: ${(cause as Error).message}`);
-    return {};
+    return undefined;
   }
 }
 
@@ -105,156 +106,109 @@ if (!existsSync(PAGES_DIR)) {
   process.exit(1);
 }
 
-const site = readJson(join(CONTENT, "site.json"));
-const pageFiles = readdirSync(PAGES_DIR).filter((f) => f.endsWith(".json"));
-const pages = pageFiles.map((f) => ({
-  file: `content/pages/${f}`,
-  data: readJson(join(PAGES_DIR, f)),
-}));
+const siteSource = "content/site.json";
+const siteData = readJson(join(CONTENT, "site.json"));
+const pageFiles = readdirSync(PAGES_DIR).filter((file) => file.endsWith(".json")).sort();
+const pageRecords: RawPageRecord[] = pageFiles.map((file) => {
+  const slug = file.slice(0, -".json".length);
+  return {
+    source: `content/pages/${file}`,
+    routePath: slug === "home" ? "/" : `/${slug}`,
+    data: readJson(join(PAGES_DIR, file)),
+  };
+});
 
-// ---------------------------------------------------------------------------
-// Site-level rules
-// ---------------------------------------------------------------------------
+scanStrings(siteData, siteSource);
+for (const record of pageRecords) scanStrings(record.data, record.source);
 
-scanStrings(site, "content/site.json");
+let parsed:
+  | {
+      site: import("../src/lib/content-schema.ts").SiteConfig;
+      pages: PageContent[];
+    }
+  | undefined;
 
-const business = (site.business ?? {}) as Record<string, never>;
-
-if (!site.url) error("content/site.json", "missing url");
-else if (String(site.url).endsWith("/"))
-  error("content/site.json", "url must not have a trailing slash");
-
-// Incomplete NAP degrades LocalBusiness schema but should not block a build
-// while the framework is still pre-launch.
-const nap: Array<[string, unknown]> = [
-  ["business.licenseNumber", business.licenseNumber],
-  ["business.address.street", (business.address as Record<string, unknown>)?.street],
-  ["business.address.postalCode", (business.address as Record<string, unknown>)?.postalCode],
-  ["business.geo.latitude", (business.geo as Record<string, unknown>)?.latitude],
-  ["business.hours", business.hours],
-  ["business.sameAs", business.sameAs],
-];
-for (const [label, value] of nap) {
-  const empty = value === undefined || value === "" || (Array.isArray(value) && value.length === 0);
-  if (empty) warn("content/site.json", `${label} is empty — LocalBusiness schema will be incomplete`);
-}
-
-// ---------------------------------------------------------------------------
-// Page-level rules
-// ---------------------------------------------------------------------------
-
-const titles = new Map<string, string[]>();
-const canonicals = new Map<string, string[]>();
-const knownPaths = new Set<string>();
-
-// First pass: collect every canonical path so internal links can be resolved.
-for (const { data } of pages) {
-  const seo = (data.seo ?? {}) as Record<string, string>;
-  if (seo.canonicalPath) knownPaths.add(seo.canonicalPath);
-}
-
-for (const { file, data } of pages) {
-  scanStrings(data, file);
-
-  const seo = (data.seo ?? {}) as Record<string, string>;
-
-  // Required SEO fields
-  for (const field of ["title", "description", "canonicalPath"] as const) {
-    if (!seo[field] || !String(seo[field]).trim()) {
-      error(file, `missing seo.${field}`);
+if (!hasInvalidJson) {
+  try {
+    parsed = parseContentBundle({ source: siteSource, data: siteData }, pageRecords);
+  } catch (cause) {
+    if (cause instanceof ContentContractError) {
+      for (const issue of cause.issues) {
+        error(issue.source, `${issue.path || "value"}: ${issue.message}`);
+      }
+    } else {
+      throw cause;
     }
   }
+}
 
-  if (seo.canonicalPath && !seo.canonicalPath.startsWith("/")) {
-    error(file, `seo.canonicalPath must be root-relative, got "${seo.canonicalPath}"`);
+// ---------------------------------------------------------------------------
+// Quality rules applied only after the runtime contract succeeds
+// ---------------------------------------------------------------------------
+
+if (parsed) {
+  const { business } = parsed.site;
+  const nap: Array<[string, unknown]> = [
+    ["business.licenseNumber", business.licenseNumber],
+    ["business.address.street", business.address.street],
+    ["business.address.postalCode", business.address.postalCode],
+    ["business.geo.latitude", business.geo.latitude],
+    ["business.hours", business.hours],
+    ["business.sameAs", business.sameAs],
+  ];
+
+  for (const [label, value] of nap) {
+    const empty = value === "" || (Array.isArray(value) && value.length === 0);
+    if (empty) warn(siteSource, `${label} is empty — LocalBusiness schema will be incomplete`);
   }
 
-  if (seo.title) titles.set(seo.title, [...(titles.get(seo.title) ?? []), file]);
-  if (seo.canonicalPath) {
-    canonicals.set(seo.canonicalPath, [...(canonicals.get(seo.canonicalPath) ?? []), file]);
-  }
-
-  // Sections
-  const sections = data.sections;
-  if (!Array.isArray(sections) || sections.length === 0) {
-    error(file, "has no sections");
-  } else {
-    sections.forEach((section: unknown, i: number) => {
-      const s = section as { type?: unknown; props?: unknown };
-      if (typeof s.type !== "string") {
-        error(file, `sections[${i}] has no type`);
-        return;
-      }
-      if (!isSectionType(s.type)) {
-        error(
-          file,
-          `sections[${i}] unknown type "${s.type}" — known types: ${SECTION_TYPES.join(", ")}`,
-        );
-      }
-      if (!s.props || typeof s.props !== "object") {
-        error(file, `sections[${i}] (${s.type}) has no props`);
-      }
-    });
-
-    // Every page needs a way to convert.
-    const types = sections.map((s: { type?: string }) => s.type);
-    const hasCta = types.some(
-      (t) => t === "CTA" || t === "ContactForm" || t === "ContactInfo" || t === "Hero",
+  parsed.pages.forEach((page, index) => {
+    const file = pageRecords[index].source;
+    const sectionTypes = page.sections.map((section) => section.type);
+    const hasCta = sectionTypes.some(
+      (type) =>
+        type === "CTA" ||
+        type === "ContactForm" ||
+        type === "ContactInfo" ||
+        type === "Hero",
     );
     if (!hasCta) error(file, "has no call to action (CTA, ContactForm, ContactInfo, or Hero)");
-  }
 
-  // Internal links must resolve
-  const links = Array.isArray(data.internalLinks) ? data.internalLinks : [];
-  for (const link of links as string[]) {
-    if (!knownPaths.has(link)) {
-      warn(file, `internalLinks target "${link}" does not resolve to a known page yet`);
+    if (page.internalLinks.length === 0) warn(file, "has no internal links");
+
+    // Location pages must carry genuine local detail (PRD §7).
+    if (page.pageType === "location") {
+      const text = JSON.stringify(page).toLowerCase();
+      const signals = ["neighborhood", "climate", "permit", "county", "weather", "soil"];
+      const found = signals.filter((signal) => text.includes(signal));
+      if (found.length < 2) {
+        error(
+          file,
+          `location page lacks local specificity — needs at least 2 of: ${signals.join(", ")}`,
+        );
+      }
     }
-  }
-  if (links.length === 0) warn(file, "has no internal links");
-
-  // Location pages must carry genuine local detail (PRD §7).
-  if (data.pageType === "location") {
-    const text = JSON.stringify(data).toLowerCase();
-    const signals = ["neighborhood", "climate", "permit", "county", "weather", "soil"];
-    const found = signals.filter((s) => text.includes(s));
-    if (found.length < 2) {
-      error(
-        file,
-        `location page lacks local specificity — needs at least 2 of: ${signals.join(", ")}`,
-      );
-    }
-  }
-}
-
-// Cross-page uniqueness — the defect that made 3 of 4 pages non-indexable.
-for (const [title, files] of titles) {
-  if (files.length > 1) {
-    error(files.join(" + "), `duplicate seo.title "${title}"`);
-  }
-}
-for (const [path, files] of canonicals) {
-  if (files.length > 1) {
-    error(files.join(" + "), `duplicate seo.canonicalPath "${path}"`);
-  }
+  });
 }
 
 // ---------------------------------------------------------------------------
 // Report
 // ---------------------------------------------------------------------------
 
-const pageCount = pages.length;
+const pageCount = pageRecords.length;
 
 if (warnings.length) {
   console.warn(`\n⚠  ${warnings.length} warning${warnings.length === 1 ? "" : "s"}`);
-  for (const w of warnings) console.warn(`   ${w}`);
+  for (const warning of warnings) console.warn(`   ${warning}`);
 }
 
 if (errors.length) {
   console.error(`\n✖ Content validation failed — ${errors.length} error${errors.length === 1 ? "" : "s"}\n`);
-  for (const e of errors) console.error(`   ${e}`);
+  for (const contentError of errors) console.error(`   ${contentError}`);
   console.error("");
   process.exit(1);
 }
 
-console.log(`\n✓ Content valid — ${pageCount} page${pageCount === 1 ? "" : "s"} checked, ${warnings.length} warning${warnings.length === 1 ? "" : "s"}\n`);
+console.log(
+  `\n✓ Content valid — ${pageCount} page${pageCount === 1 ? "" : "s"} checked, ${warnings.length} warning${warnings.length === 1 ? "" : "s"}\n`,
+);

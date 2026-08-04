@@ -1,0 +1,9 @@
+{
+  "type": "Hero",
+  "props": {
+    "eyebrow": "Eyebrow",
+    "headline": "Headline",
+    "primaryButton": "Primary",
+    "secondaryButton": "Secondary"
+  }
+}

@@ -2,7 +2,7 @@
 
 **Written:** 2026-08-04
 **Repo:** `ndxtraders/authority-site-generator-gpt`
-**State:** Phases 0–3 complete; production-readiness plan approved. Start at H.1.
+**State:** Phases 0–3 and H.1 complete. Start at H.2.
 
 > **Prime Directive:** Work only in the GPT local folder and GitHub repository. The local
 > and GitHub `authority-site-generator` upstreams are protected unless Rev proactively
@@ -30,7 +30,7 @@ and PRD win — this file is a summary, not the source of truth.
 
 ---
 
-## Start here — H.1, not Phase 4
+## Start here — H.2, not Phase 4
 
 The production-readiness review found that the architecture is sound but the quality gate
 is shallower than its documentation, the conversion boundary leaks future server
@@ -40,17 +40,35 @@ enforce the acceptance criteria.
 
 Phase H addresses those risks before the framework multiplies routes and niches:
 
-1. **H.1** — runtime schemas and strict content parsing
-2. **H.2** — server-only conversion configuration
+1. **H.1** — runtime schemas and strict content parsing — **complete**
+2. **H.2** — server-only conversion configuration — **next**
 3. **H.3** — lead validation, timeout, and abuse controls
 4. **H.4** — sample/verified content states and production truth gate
 5. **H.5** — JSON-LD safety, connected entities, and indexation
 6. **H.6** — automated tests, browser checks, and GitHub CI
 7. **H.7** — documentation reconciliation and v0.5.1 release
 
-Treat each task as one Codex session. When its acceptance checks pass, commit, update
-`docs/SESSION.md`, and begin the next task in a fresh session. Do not switch sessions in
-the middle of a failing build or partial migration.
+Treat each task as one Codex session. H.1 is the completed checkpoint; begin H.2 in a
+fresh session. When its acceptance checks pass, commit, update `docs/SESSION.md`, and
+stop before H.3. Do not switch sessions in the middle of a failing build or partial
+migration.
+
+### H.1 checkpoint
+
+- `src/lib/content-schema.ts` is the single executable contract. It contains strict Zod
+  schemas and inferred types for site, pages, all 12 section variants, nested props, and
+  shared item shapes.
+- `src/lib/content.ts` parses every imported JSON object before exposing it. The old
+  `as unknown as` loader casts are gone.
+- `scripts/validate-content.mts` uses the same bundle parser, then applies placeholder,
+  CTA, local-specificity, and development-warning rules.
+- The bundle parser accepts source/route records, so Phase 4 can pass service, location,
+  and FAQ collections through the same contract without duplicating schema logic.
+- `tests/fixtures/content-contract/` and `tests/content-contract.test.mts` cover missing
+  Hero/FAQ/form props, wrong types, unknown keys, bad formats/enums, route disagreement,
+  duplicate titles/canonicals, and broken internal links.
+- H.1 checks passed: validation (5 pages, 8 known warnings), lint, TypeScript, 15 tests,
+  and a 16-route production build.
 
 ---
 
@@ -61,10 +79,11 @@ Phases 0–3 are done. You are extending a working framework, not starting one.
 | Thing | Where | Notes |
 |---|---|---|
 | Content model | `content/site.json` + `content/pages/*.json` | 5 pages today: home, about, services, contact, thank-you |
-| Section union | `src/types/sections.ts` | `SectionPropsMap` is the single source; `Section`/`SectionType` derive from it |
+| Runtime contract | `src/lib/content-schema.ts` | Strict shared Zod schemas; TypeScript content types are inferred from them |
+| Section union | `src/types/sections.ts` | Re-exports schema-inferred `SectionPropsMap`, `Section`, and `SectionType` |
 | Section dispatch | `src/lib/sections.tsx` | Exhaustive switch — **do not convert to a lookup table**, read the file's own comment first. Also the injection point for site-wide data (`business`, `conversion`) into section props that need more than their JSON content |
-| Content loader | `src/lib/content.ts` | The only module that knows where content lives. **Currently a static import map (`PAGES` object) — see "The one architectural thing" below** |
-| Validator | `scripts/validate-content.mts` | Gates `next build` via `prebuild`. Errors fail the build; warnings print only |
+| Content loader | `src/lib/content.ts` | The only module that knows where content lives. Parses static imports through the shared contract. **Still a static `PAGES` map — see "The one architectural thing" below** |
+| Validator | `scripts/validate-content.mts` | Uses the shared bundle parser and gates `next build` via `prebuild`; errors fail, development warnings print only |
 | Metadata | `src/lib/metadata.ts` | `buildPageMetadata(page)` — every page has a unique title/description/canonical |
 | Schema engine | `src/lib/schema/` | `buildSchema(page, site)` — LocalBusiness + BreadcrumbList always; FAQPage/Review conditional on section presence; WebSite/Service on `page.schema` opt-in |
 | Conversion config | `src/types/site.ts` → `ConversionConfig`, `content/site.json` → `conversion` block | `trackingPhone`/`displayPhone` for `tel:` links, `formEndpoint` (empty — see stubs), `thankYouPath`, `model` |
@@ -223,8 +242,9 @@ not per-niche forks), which is Rev's call, not yours.
 5. **`TestimonialItem.rating` is unset on every testimonial**, so `Review`/
    `AggregateRating` schema is never emitted (PRD §6 wants it). Needs real ratings from
    the business, not a placeholder value.
-6. **Runtime content validation is incomplete.** The loader casts imported JSON, and the
-   validator does not enforce nested section prop schemas. H.1 replaces that boundary.
+6. **Runtime content validation was completed in H.1.** Keep
+   `src/lib/content-schema.ts` as the single parser/type source and do not reintroduce
+   loader casts.
 7. **Future form configuration crosses the client boundary.** The ContactForm Client
    Component receives the full conversion object, and the unconfigured failure path logs
    raw lead fields. H.2 removes both behaviors.

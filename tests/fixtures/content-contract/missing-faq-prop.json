@@ -1,0 +1,13 @@
+{
+  "type": "FAQ",
+  "props": {
+    "eyebrow": "FAQ",
+    "title": "Questions",
+    "description": "Answers",
+    "items": [
+      {
+        "question": "What happens next?"
+      }
+    ]
+  }
+}

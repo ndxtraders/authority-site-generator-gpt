@@ -1,0 +1,16 @@
+{
+  "type": "ContactForm",
+  "props": {
+    "title": "Contact",
+    "description": "Send a request",
+    "fields": {
+      "name": { "label": "Name", "placeholder": "Your name" },
+      "phone": { "label": "Phone", "placeholder": "Your phone" },
+      "email": { "label": "Email" },
+      "message": { "label": "Message", "placeholder": "Your message" }
+    },
+    "submitLabel": "Submit",
+    "submittingLabel": "Submitting",
+    "errorMessage": "Try again"
+  }
+}

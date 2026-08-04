@@ -1,7 +1,7 @@
 # Current Session
 
-**Version:** v0.5 complete; v0.5.1 planned
-**Phase:** H.1 — executable content contract is next
+**Version:** v0.5 complete; v0.5.1 H.1 complete
+**Phase:** H.2 — server-only conversion boundary is next
 **First market:** Modesto, CA (roofing)
 **Authorized repo:** `ndxtraders/authority-site-generator-gpt`
 
@@ -13,7 +13,8 @@ navigation. An independent production-readiness review confirmed the architectur
 clean build, then identified hardening work that must precede page and niche expansion.
 
 The PRD is now v1.1 with decisions D7–D11. `docs/IMPLEMENTATION_PLAN.md` contains Phase H,
-seven sequenced v0.5.1 tasks. Each H task is a natural Codex session boundary.
+seven sequenced v0.5.1 tasks. H.1 now provides the shared executable content contract;
+H.2–H.7 remain. Each H task is a natural Codex session boundary.
 
 ## Completed in the planning session
 
@@ -29,14 +30,37 @@ seven sequenced v0.5.1 tasks. Each H task is a natural Codex session boundary.
 - Corrected this checkout's `origin` from the protected upstream to the GPT repository
 - Created local recovery branch `backup/pre-v0-5-1-planning`
 
+## Completed in H.1
+
+- Added strict Zod runtime schemas for the complete site, page, section, nested-prop,
+  shared-item, format, and enum contract in `src/lib/content-schema.ts`
+- Inferred the public TypeScript content types from those schemas
+- Replaced loader-boundary JSON casts with shared runtime parsing before content enters
+  pages or components
+- Made the Node validator use the same parser for shape, URL/phone/path formats,
+  route/slug agreement, schema relationships, title/canonical uniqueness, navigation,
+  redirects, and internal-link resolution
+- Added 14 negative fixture files and 15 contract tests covering the H.1 failure classes
+- Added `zod` as a direct runtime dependency and `npm test` for the fixture suite
+
+H.1 verification results:
+
+- `npm run validate` — passed, 5 pages checked; 8 existing development warnings
+- `npm run lint` — passed
+- `npx tsc --noEmit` — passed
+- `npm test` — passed, 15/15
+- `npm run build` — passed, 16 routes generated (required network access for configured
+  Google fonts)
+
 ## Next — exact starting point
 
-Start a fresh Codex task for **H.1 — Establish the executable content contract** in
-`docs/IMPLEMENTATION_PLAN.md`. Do not start Phase 4 until H.1–H.7 pass.
+Start a fresh Codex task for **H.2 — Make the conversion boundary server-only** in
+`docs/IMPLEMENTATION_PLAN.md`. Do not start H.3 or Phase 4.
 
-H.1 begins by selecting the smallest shared runtime-schema approach, adding failing
-fixtures for malformed nested props and formats, and replacing JSON casts at the loader
-boundary. Read the relevant Next.js 16 bundled docs before changing build-time loading.
+H.2 begins by separating display-safe conversion values from endpoint/provider
+configuration, then updating the Server Action and ContactForm boundary so the browser
+never receives the full conversion object. Preserve H.1's parser as the only content
+loader boundary.
 
 ## Known launch blockers
 
