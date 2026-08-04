@@ -3,16 +3,31 @@
 > **Superseded.** The content model is specified in `FRAMEWORK_PRD.md` §4, and the
 > TypeScript source of truth lives in `src/types/`.
 
-## Current shape (v0.2 — flat)
+## Current shape (v0.5 — page-based)
 
-A single `content/site.json` with these top-level keys:
+The repository currently separates site-wide configuration from page content:
 
 ```
-business, branding, navigation, hero, services, whyChooseUs,
-proof, process, testimonials, faq, cta, footer, seo, schema
+content/
+  site.json                 business, branding, navigation, footer, legal, conversion
+  pages/                    home, about, services, contact, thank-you
 ```
 
-## Target shape (v0.3 — page-based)
+The privacy policy, terms, disclaimer, and accessibility statement are generated from
+site configuration rather than stored as page JSON.
+
+Each page declares `slug`, `pageType`, `seo`, `schema`, `sections`, and
+`internalLinks`. The section registry maps each section `type` to a reusable React
+component.
+
+## v0.5.1 hardening
+
+The TypeScript interfaces document the intended shape, but the runtime loader still
+trusts JSON after shallow checks. Phase H.1 in `IMPLEMENTATION_PLAN.md` replaces that
+trust boundary with shared runtime schemas that validate nested props, supported
+section types, formats, unknown fields, and cross-file relationships.
+
+## Phase 4 expansion
 
 ```
 content/
@@ -23,10 +38,5 @@ content/
   faq/                      one file per question → /faq/[slug]
 ```
 
-Each page file declares `slug`, `pageType`, `seo`, `schema`, `sections`, and
-`internalLinks`. See `FRAMEWORK_PRD.md` §4 for the full specification and validation
-rules.
-
-**Why the change:** the flat model has one `hero` and one `seo` key, which cannot express
-multiple pages. That directly caused page copy to be hardcoded into React and every page
-to emit the same canonical URL.
+Phase 4 adds the service, location, and FAQ collections and their dynamic routes. See
+`FRAMEWORK_PRD.md` §4 for the complete contract and validation rules.

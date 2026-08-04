@@ -12,13 +12,19 @@ Header, Footer, Hero, shadcn/ui.
 **v0.2** — Reusable section architecture: `Container`, `Section`, `SectionHeading`, plus
 nine trade-agnostic section components and three additional routes.
 
+**v0.3** — Page-based content model, section registry, reusable page renderer, and
+content validation command.
+
+**v0.4** — Metadata, canonical URLs, JSON-LD generation, sitemap, and robots support.
+
+**v0.5** — Contact form flow, click-to-call actions, legal pages, thank-you page, and
+responsive navigation.
+
 ## Planned
 
 | Version | Theme |
 |---|---|
-| v0.3 | Page-based content model, section registry, content validator |
-| v0.4 | SEO engine — metadata, schema generation, generated sitemap and robots |
-| v0.5 | Conversion layer — working form, click-to-call, legal pages, mobile nav |
+| v0.5.1 | Production hardening — executable content contract, server-only conversion configuration, lead protection, truth gate, safe schema, tests, and CI |
 | v0.6 | Hub-and-spoke routing — services, locations, FAQ |
 | v0.7 | Niche packs — roofing and locksmith; plumbing site as proof |
 | v1.0 | Production — design tokens, accessibility, performance |

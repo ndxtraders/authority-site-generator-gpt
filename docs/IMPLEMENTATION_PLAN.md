@@ -1,9 +1,9 @@
 # Implementation Plan — v0.3 through v1.0
 
-**Target repo:** `ndxtraders/authority-site-generator`
+**Target repo:** `ndxtraders/authority-site-generator-gpt`
 **Companion doc:** `docs/FRAMEWORK_PRD.md` — read it before starting. It is the source of truth.
-**Status:** Ready to execute
-**Written:** 2026-08-03
+**Status:** Phases 0–3 complete; v0.5.1 hardening is next
+**Written:** 2026-08-03; revised 2026-08-04 after independent production-readiness review
 
 ---
 
@@ -13,7 +13,46 @@ Work **one task at a time, in order**. Each task lists the files it touches, wha
 and an acceptance check. Do not start a task until the previous task's acceptance check
 passes.
 
-Phases map to versions in the PRD (§11). Commit at the end of each phase, not each task.
+Phases map to versions in the PRD (§11). From v0.5.1 onward, commit every completed
+numbered task because each task may be a Codex session boundary. Add a phase-level release
+commit only when the phase needs final integration changes.
+
+### Repository boundary
+
+All work governed by this plan goes only to the local
+`/Users/raulvaughn/Documents/authority-site-generator-gpt` checkout and GitHub repository
+`ndxtraders/authority-site-generator-gpt`. The upstream `authority-site-generator` local
+folder and GitHub repository are protected. Verify `pwd` and `git remote -v` before every
+write or push; see `AGENTS.md` for the Prime Directive.
+
+### Codex session boundaries
+
+A numbered task with passing acceptance checks is the default unit of one Codex session.
+Start a fresh task at these natural boundaries:
+
+- After any numbered task in v0.5.1 or later passes its acceptance checks
+- At every phase commit
+- Before changing subsystems, for example validation → forms or routing → design system
+- Before work that depends on new business facts, provider credentials, legal review, or
+  another external decision
+- When investigation has become long enough that the written checkpoint is clearer than
+  the active conversation
+
+Do **not** end or switch sessions during a failing build, partially applied migration, or
+uncommitted multi-file change. Finish or safely roll the task back first.
+
+Before ending a session:
+
+1. Run the task's acceptance checks.
+2. Commit a coherent checkpoint on the active development branch.
+3. Update `docs/SESSION.md` with changes, validation results, risks, and the exact next
+   task number.
+4. Update `docs/HANDOFF.md` if architecture, sequencing, or resume instructions changed.
+5. Record `git status -sb`; do not make a fresh session rediscover intentional state.
+
+A new session starts by reading `AGENTS.md`, `README.md`, `docs/SESSION.md`,
+`docs/HANDOFF.md`, the relevant plan task, and the current git status. It should not
+re-audit completed phases unless the handoff identifies an unresolved failure.
 
 ### Before writing any code
 
@@ -37,7 +76,8 @@ Heed deprecation notices in those files.
 ### Guardrails
 
 1. **Never delete a file without asking.** Move to `Archive/` if unsure.
-2. **Never push to `main` without explicit permission.** Commit locally; ask before pushing.
+2. **Push only to the GPT repository.** Rev has granted standing permission for reasonable
+   commits and pushes there. That permission never applies to the protected upstream.
 3. **Run `npx next build` after every task.** A task is not done if the build breaks.
 4. **No business-specific strings in `src/`.** If you type "roof," "Modesto," or a phone
    number into a file under `src/`, you have made a mistake. The only exceptions are
@@ -544,6 +584,209 @@ closes on selection.
 
 ---
 
+# Phase H — v0.5.1: Production hardening
+
+Goal: make the framework honest, safe, testable, and difficult to deploy incorrectly
+before multiplying pages and niches. **Do not start Phase 4 until H.1–H.7 pass.**
+
+Each H task is intentionally scoped as one Codex session. Finish its acceptance checks,
+update `docs/SESSION.md`, and commit before starting the next task in a fresh session.
+
+### H.1 — Establish the executable content contract
+
+**Primary files:** `src/lib/content.ts`, `src/types/`, `src/lib/section-types.ts`,
+`scripts/validate-content.mts`, new runtime-schema module(s), test fixtures
+
+1. Choose one runtime schema approach that can run in both the Next build and the plain
+   Node validator. Prefer a single source for runtime schemas and inferred TypeScript
+   types; if existing types remain separate, add compile-time equivalence tests.
+2. Define strict schemas for `SiteConfig`, every `PageContent` field, every section's
+   nested props, and shared items. Reject unknown keys where silent typos would be unsafe.
+3. Remove `as unknown as` as the mechanism that makes imported content appear valid.
+   Parse content at the loader boundary and return typed data only after validation.
+4. Validate formats and relationships: absolute site origin, root-relative canonicals and
+   redirects, E.164 tracking phone, valid conversion model and schema names, slug/route
+   agreement, unique titles/canonicals, and resolvable internal links.
+5. Design the loader so Phase 4 can apply the same parser to `services/`, `locations/`,
+   and `faq/` without duplicating validation logic.
+
+**Acceptance:**
+
+- `npm run validate`, lint, typecheck, and production build pass on current content
+- Fixture tests prove that a missing nested Hero/FAQ/form prop, wrong type, unknown prop,
+  duplicate canonical, malformed phone/URL, and broken internal link all fail validation
+- Components and pages never receive unparsed content
+
+**Commit:** `v0.5.1 H1: enforce runtime content schemas`
+
+**Session boundary:** start H.2 in a fresh task.
+
+### H.2 — Make the conversion boundary server-only
+
+**Primary files:** `src/lib/actions/contact.ts`, `src/components/forms/ContactForm.tsx`,
+`src/components/sections/ContactForm.tsx`, `src/lib/sections.tsx`, `src/types/site.ts`,
+deployment documentation
+
+1. Stop passing the full `ConversionConfig` through the ContactForm Client Component.
+   The Server Action reads the endpoint and thank-you path from trusted server config.
+2. Move endpoint URLs, credentials, signing secrets, and provider tokens out of public
+   content and into server-only deployment configuration. Keep only display-safe values
+   in content.
+3. Remove raw lead fields from logs. Operational logs may contain a generated request ID,
+   provider status category, and non-sensitive timing only.
+4. Validate the redirect as a known internal path; never accept it as a client-bound
+   argument.
+5. Inspect built HTML/RSC output and client bundles for endpoint names, secret values, and
+   serialized server configuration.
+
+**Acceptance:**
+
+- A sentinel endpoint/secret configured for the test cannot be found in built browser
+  payloads or client JavaScript
+- Failed and unconfigured submissions do not log name, phone, email, or message
+- Success redirects only after the server confirms provider delivery
+- Server-only configuration is documented without committing real credentials
+
+**Commit:** `v0.5.1 H2: isolate conversion configuration`
+
+**Session boundary:** start H.3 in a fresh task.
+
+### H.3 — Validate and protect lead submission
+
+**Primary files:** `src/lib/actions/contact.ts`, form components, validation tests,
+deployment/provider adapter
+
+1. Enforce server-side field normalization, required values, maximum lengths, email
+   format, and a practical phone-number policy. Reject unexpected fields and oversized
+   payloads with generic visitor-safe errors.
+2. Add accessible field-level or form-level error handling without echoing sensitive
+   submitted values.
+3. Add a low-friction spam control suitable for static local-business sites. At minimum,
+   use a honeypot and submission timing check; document provider-side rate limiting or
+   add a durable rate limiter before public launch.
+4. Add an explicit provider timeout with predictable handling for network errors,
+   non-2xx responses, and malformed provider responses.
+5. Test duplicate submissions and ensure the provider contract is idempotent where the
+   selected provider supports it.
+
+**Acceptance:**
+
+- Tests cover valid submission, every invalid field, oversized input, bot trap, timeout,
+  provider error, and successful redirect
+- No rejected input reaches the provider
+- A public launch checklist identifies the active rate-control owner and configuration
+
+**Commit:** `v0.5.1 H3: harden lead submission`
+
+**Session boundary:** start H.4 in a fresh task.
+
+### H.4 — Add truth and production-readiness gates
+
+**Primary files:** `content/site.json`, content types/schemas, validator, deployment
+checklist, current sample content
+
+1. Add an explicit content lifecycle state such as `sample` versus `verified`. Current
+   roofing content starts as `sample`.
+2. Add `npm run verify:production` (or an equivalent predeploy command) that rejects
+   sample status, reserved phone numbers, incomplete NAP, unreviewed legal text, missing
+   form delivery, missing real images, and other launch blockers.
+3. Inventory factual claims in current content, including licence/insurance, 25+ years,
+   1,200+ projects, 24/7 response, warranties, testimonials, and ratings. Each is verified
+   against a recorded source or removed. Do not invent replacements.
+4. Keep the ordinary development build usable with clearly marked sample content while
+   making it impossible to mistake that build for production-ready output.
+5. Produce a human review checklist for facts that software cannot prove: business
+   identity, local knowledge, testimonials, legal language, and GBP alignment.
+
+**Acceptance:**
+
+- Current sample content passes development validation but fails production verification
+- A verified fixture passes; each launch blocker has a failing fixture
+- No unsupported trust claim remains eligible for production output
+- Human-owned verification items name the required source and reviewer
+
+**Commit:** `v0.5.1 H4: add production truth gate`
+
+**Session boundary:** stop here if real business facts or legal review are required;
+record the exact dependency rather than fabricating content. Otherwise start H.5 fresh.
+
+### H.5 — Correct indexation and structured-data safety
+
+**Primary files:** `src/components/common/JsonLd.tsx`, `src/lib/schema/`,
+`src/lib/metadata.ts`, `src/app/sitemap.ts`, `content/pages/thank-you.json`, manifest
+
+1. Safely serialize JSON-LD so authored content cannot terminate the script element.
+2. Give the LocalBusiness and WebSite stable `@id` values. Connect Service provider,
+   Review `itemReviewed`, and AggregateRating to the same business entity.
+3. Emit review/rating data only from verified source content and validate rating ranges.
+4. Mark `/thank-you` `noindex` and remove it from the sitemap. Add a reusable indexation
+   field if future utility pages need the same treatment.
+5. Use truthful sitemap modification dates or omit them; deployment time is not a content
+   update. Remove manifest references to missing assets or add the actual valid asset.
+6. Validate representative graphs against schema.org tooling and preserve fixtures of the
+   expected connected graph.
+
+**Acceptance:**
+
+- A JSON-LD fixture containing `</script>` cannot escape the script payload
+- Home, service, FAQ, location, and rated-testimonial fixtures form the expected connected
+  graph without unsupported nodes
+- `/thank-you` has `noindex` and is absent from the sitemap
+- Sitemap and manifest reference only truthful dates and existing assets
+
+**Commit:** `v0.5.1 H5: harden schema and indexation`
+
+**Session boundary:** start H.6 in a fresh task.
+
+### H.6 — Add automated tests and CI
+
+**Primary files:** test configuration, test fixtures, `.github/workflows/`, `package.json`
+
+1. Use the smallest test stack that supports TypeScript modules reliably. Add unit tests
+   for runtime schemas, content loading, URL assembly, metadata, schema builders, legal
+   page generation, and contact-action behavior.
+2. Add fixture-driven negative tests for every validator defect class introduced through
+   H.5. Tests must assert the failure reason, not just a nonzero exit code.
+3. Add a production-build integration check for routes, unique titles/canonicals,
+   indexation, JSON-LD graphs, `tel:` links, and absence of server-only configuration.
+4. Add browser coverage for mobile navigation and the contact form's validation/error
+   states. Keep full Lighthouse testing for Phase 6, but make browser correctness part of
+   CI now.
+5. Add GitHub Actions for validation, lint, typecheck, tests, and production build on pull
+   requests and pushes to the development repository.
+
+**Acceptance:** a clean checkout runs one documented verification command and CI enforces
+the same required checks. Deliberately breaking a schema fixture, canonical, form
+boundary, or client-secret assertion causes CI to fail.
+
+**Commit:** `v0.5.1 H6: add regression suite and CI`
+
+**Session boundary:** start H.7 in a fresh task.
+
+### H.7 — Reconcile documentation and release v0.5.1
+
+**Primary files:** `README.md`, `package.json`, `docs/CHANGELOG.md`, `docs/SESSION.md`,
+`docs/HANDOFF.md`, `docs/CONTENT_SCHEMA.md`, `docs/DEPLOYMENT.md`
+
+1. Update package and documentation versions to v0.5.1.
+2. Document runtime schemas, sample versus verified content, server-only conversion
+   configuration, production verification, tests, CI, and the decision that `/contact`
+   is the required v1 conversion destination.
+3. Audit every README path and workflow claim against the actual tree. Do not describe
+   `niches/` or dynamic content directories as present until they exist.
+4. Run the complete v0.5.1 verification command and inspect the production output.
+5. Update the handoff so a cold session starts at Phase 4.1 without re-auditing H.1–H.7.
+
+**Acceptance:** docs agree on version, current phase, repository, commands, and next task;
+all automated checks pass; the production gate still rejects the sample roofing site for
+the documented real-world dependencies.
+
+**Commit:** `v0.5.1: production hardening`
+
+**Phase boundary:** begin Phase 4 in a new Codex task.
+
+---
+
 # Phase 4 — v0.6: Hub-and-spoke routing
 
 ### 4.1 — Dynamic routes
@@ -689,6 +932,20 @@ silently dropped.
 | 23 | Content is generic; zero local knowledge | 4.3 |
 | 24 | No `llms.txt` | 2.5 |
 | 25 | Docs stale, escaped, and partly uncommitted | 0.3 |
+| 26 | JSON is cast to TypeScript types without complete runtime validation | H.1 |
+| 27 | Nested section props and invalid formats can pass the validator | H.1 |
+| 28 | Broken internal links warn instead of failing the documented quality gate | H.1 |
+| 29 | Full conversion config, including future endpoint, crosses the client boundary | H.2 |
+| 30 | Failed submissions log raw lead PII | H.2 |
+| 31 | Form lacks bounded validation, timeout, spam controls, and rate-control plan | H.3 |
+| 32 | Unverified trust claims, statistics, and testimonials can pass a build | H.4 |
+| 33 | Development sample content is not mechanically separated from production content | H.4 |
+| 34 | JSON-LD serialization does not escape script-closing content | H.5 |
+| 35 | Review and AggregateRating nodes are disconnected from the business entity | H.5 |
+| 36 | Thank-you page is indexable and included in the sitemap | H.5 |
+| 37 | Sitemap dates and manifest assets can make unsupported freshness/asset claims | H.5 |
+| 38 | No project tests or CI protect the documented acceptance criteria | H.6 |
+| 39 | README and package versions lag the implemented version | H.7 |
 
 ---
 
@@ -697,6 +954,9 @@ silently dropped.
 1. A new site in an existing niche launches with **zero** changes under `src/`
 2. A plumbing site builds from the same `src/` with a different niche pack and content
 3. Every PRD §10 checklist item passes on the generated roofing site
-4. The validator catches all 25 defect classes above
+4. Runtime validation and production verification catch every machine-checkable defect
+   class above; factual claims that software cannot prove require a recorded human review
 5. Lighthouse ≥ 95 across all categories
 6. A cold session can read `README.md` → `FRAMEWORK_PRD.md` and be productive
+7. No server-only conversion value or submitted PII appears in browser payloads or logs
+8. Required validation, tests, browser checks, and production build pass in CI

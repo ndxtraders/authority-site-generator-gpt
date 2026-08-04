@@ -1,63 +1,65 @@
 # Current Session
 
-**Version:** v0.5 complete
-**Phase:** Implementation Plan Phases 0–3 done; Phase 4 (hub-and-spoke routing) next
+**Version:** v0.5 complete; v0.5.1 planned
+**Phase:** H.1 — executable content contract is next
 **First market:** Modesto, CA (roofing)
+**Authorized repo:** `ndxtraders/authority-site-generator-gpt`
 
 ## Where we are
 
-The framework has a working reusable section layer, a page-based content model with a
-build-time validator, a real SEO/schema engine, and now a real conversion layer:
-click-to-call throughout, a contact form that genuinely submits (and honestly errors
-when no delivery provider is configured) and redirects to a thank-you page, generated
-legal pages, and accessible mobile navigation. Build passes, 16 routes, tsc and lint
-clean, zero business strings in `src/`.
+Phases 0–3 produced a working section framework, page content model, initial validator,
+SEO/schema engine, click-to-call flow, Server Action form path, legal templates, and mobile
+navigation. An independent production-readiness review confirmed the architecture and
+clean build, then identified hardening work that must precede page and niche expansion.
 
-## Completed this session
+The PRD is now v1.1 with decisions D7–D11. `docs/IMPLEMENTATION_PLAN.md` contains Phase H,
+seven sequenced v0.5.1 tasks. Each H task is a natural Codex session boundary.
 
-- Full architecture audit against the quality checklist
-- Reviewed two reference sites (`emergency-plumber`, `emergency-locksmith-modesto`)
-- Decided: one framework with niche packs, not per-niche forks (PRD D1)
-- Decided: page-based content model (PRD D2)
-- Wrote `FRAMEWORK_PRD.md` and `IMPLEMENTATION_PLAN.md`
-- Migrated the working tree into `authority-site-generator`
-- Archived dead code; rebuilt the documentation layer
-- Phase 1 (v0.3) complete: content model, section registry, loader, validator
-- Phase 2 (v0.4) complete: metadata, schema generator, generated sitemap/robots/manifest,
-  llms.txt — see three revision notes in the plan (2.4's zero-code-change bar deferred to
-  Phase 4; 2.5's `force-static` requirement for Route Handlers; the testimonial-rating
-  content-model gap in the changelog)
-- Phase 3 (v0.5) complete: `conversion` config, `CallLink` + real `tel:` links, a Server
-  Action-backed contact form with a real thank-you page, generated legal pages, and
-  accessible mobile navigation — see the revision notes on 3.1–3.5 in the plan and the
-  v0.5 changelog entry
+## Completed in the planning session
 
-## Next
+- Reviewed local code, built output, Git history, and the GitHub repository
+- Verified validation, lint, typecheck, and an isolated 16-route production build
+- Identified the client serialization of the full conversion object and raw PII logging
+- Identified shallow nested-prop validation, unverified trust claims, unsafe JSON-LD
+  serialization, disconnected review schema, thank-you indexation, and missing tests/CI
+- Added PRD decisions for runtime schemas, truth gates, server-only conversion data,
+  connected structured data, and `/contact` as the required v1 conversion destination
+- Added Phase H tasks H.1–H.7 with acceptance criteria and commit/session boundaries
+- Persisted the GPT repository Prime Directive in `AGENTS.md`
+- Corrected this checkout's `origin` from the protected upstream to the GPT repository
+- Created local recovery branch `backup/pre-v0-5-1-planning`
 
-Phase 4 (v0.6) — hub-and-spoke routing: dynamic `service`/`location` routes. See
-`IMPLEMENTATION_PLAN.md`.
+## Next — exact starting point
 
-## Known stubs — do not ship a live site yet
+Start a fresh Codex task for **H.1 — Establish the executable content contract** in
+`docs/IMPLEMENTATION_PLAN.md`. Do not start Phase 4 until H.1–H.7 pass.
 
-- `conversion.formEndpoint` is empty — no lead-delivery provider (email/CRM) is wired
-  up. The contact form's Server Action (`src/lib/actions/contact.ts`) is honest about
-  this: it returns a clear error instead of the old fake-success stub, but no lead
-  submitted through the live form is actually delivered anywhere yet. Choose a provider
-  and set `formEndpoint` before launch.
-- The four generated legal pages (`src/lib/legal.ts`) are generic templates populated
-  only with real `business`/`site` fields — no fabricated claims, but **not a
-  substitute for legal review**. Have counsel review before shipping.
-- Mobile navigation (`src/components/layout/MobileNav.tsx`) was verified via the built
-  HTML's ARIA markup, not in an actual browser — no browser automation tool was
-  available this session. Do a manual keyboard-only pass at 375px before shipping.
-- `business.address`, `geo`, `hours`, `sameAs`, and `licenseNumber` are empty, and the
-  phone is a 555 placeholder. The validator warns on all six; they must become errors
-  before launch.
-- `TestimonialItem.rating` is optional and currently unset on every testimonial, so
-  `Review`/`AggregateRating` schema is not emitted. Needs real ratings from the business,
-  not a placeholder value.
+H.1 begins by selecting the smallest shared runtime-schema approach, adding failing
+fixtures for malformed nested props and formats, and replacing JSON casts at the loader
+boundary. Read the relevant Next.js 16 bundled docs before changing build-time loading.
 
-## Repo note
+## Known launch blockers
 
-`authority-site-generator` is the active repo. `roof-repair-modesto` is a deliberately
-frozen fallback and should not be modified.
+- Current business phone and tracking number use reserved 555 data
+- Address, postal code, geo, hours, sameAs, and licence number are incomplete
+- Form delivery is not configured and the current boundary would expose a future endpoint
+- Raw lead data is logged when delivery is not configured
+- Current trust statistics and testimonials have not been verified
+- Generated legal templates have not been reviewed by counsel
+- Review/AggregateRating schema has no verified ratings and is not entity-connected
+- The thank-you page is currently indexable and in the sitemap
+- Starter assets remain; the manifest references an icon that does not exist
+- Mobile navigation has not had a real browser keyboard pass
+- No project test suite or CI protects the acceptance criteria
+
+## Session checkpoint rule
+
+At the end of each H task: run its checks, commit the checkpoint, update this file with
+results and the exact next task, update `docs/HANDOFF.md` if architecture changed, and
+start the next numbered task in a fresh Codex session.
+
+## Repository boundary
+
+Only `authority-site-generator-gpt` is authorized for edits and pushes. The local and
+GitHub `authority-site-generator` upstreams are protected and must not be modified unless
+Rev proactively initiates that exact request.

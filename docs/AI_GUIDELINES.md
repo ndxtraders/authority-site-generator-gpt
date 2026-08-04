@@ -34,6 +34,8 @@ If not, redesign it.
 ## Guardrails
 
 - Never delete a file without asking. Move to `Archive/` if unsure.
-- Never push to `main` without explicit permission.
+- Push only to `ndxtraders/authority-site-generator-gpt`. Rev has granted standing
+  permission for reasonable commits and pushes there; the protected upstream is never
+  included in that permission.
 - Smallest diff that accomplishes the goal. Don't refactor neighboring code.
 - If a task reveals the plan is wrong, stop and say so. Don't improvise around it.

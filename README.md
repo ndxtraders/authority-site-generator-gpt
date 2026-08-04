@@ -1,5 +1,10 @@
 # Authority Site Generator
 
+> **Development fork:** This repository is the authorized GPT working copy,
+> `ndxtraders/authority-site-generator-gpt`. The upstream
+> `ndxtraders/authority-site-generator` repository is read-only unless Rev proactively
+> requests work there. See `AGENTS.md` before making changes.
+
 A framework that generates **Local Authority Websites** for local service businesses —
 roofing, plumbing, locksmith, HVAC, and others — from structured content.
 
@@ -86,9 +91,13 @@ See `docs/DEPLOYMENT.md` for the full checklist.
 
 ## Status
 
-**v0.2 shipped** — reusable section architecture, typed content model, 8 static routes.
+**v0.5 complete** — content model, section registry, validator, SEO/schema engine,
+conversion layer, legal pages, and mobile navigation.
 
-**v0.3 in progress** — page-based content model, section registry, content validator.
+**v0.5.1 planned next** — production hardening: runtime content schemas, conversion
+security, truth/launch gates, schema safety, automated tests, and CI.
+
+After v0.5.1: v0.6 hub-and-spoke routing, v0.7 niche packs, then v1.0 production work.
 
 Known defects are tracked in the defect ledger at the end of
 `docs/IMPLEMENTATION_PLAN.md`.

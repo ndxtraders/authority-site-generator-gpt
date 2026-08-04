@@ -1,9 +1,12 @@
-# Handoff — Phases 4 through 6
+# Handoff — v0.5.1 hardening through v1.0
 
 **Written:** 2026-08-04
-**Repo:** `ndxtraders/authority-site-generator`, branch `main`, at `f8abd8d` (pushed)
-**State:** Phases 0–3 complete. Build green, 16 routes, tsc/lint/validator all clean.
-Start at Phase 4.1.
+**Repo:** `ndxtraders/authority-site-generator-gpt`
+**State:** Phases 0–3 complete; production-readiness plan approved. Start at H.1.
+
+> **Prime Directive:** Work only in the GPT local folder and GitHub repository. The local
+> and GitHub `authority-site-generator` upstreams are protected unless Rev proactively
+> initiates a request to modify them. Verify `pwd` and `git remote -v` before writing.
 
 ---
 
@@ -11,21 +14,43 @@ Start at Phase 4.1.
 
 1. `docs/FRAMEWORK_PRD.md` — what we're building. **Source of truth.** If anything
    contradicts it, the PRD wins.
-2. `docs/IMPLEMENTATION_PLAN.md` — your task list. Phase 4 is next; its full text (tasks
-   4.1–4.5) sits right after the Phase 3 section, which now carries revision notes on
-   3.1–3.5 worth skimming — they record real decisions, not just history.
+2. `docs/IMPLEMENTATION_PLAN.md` — your task list. Phase H (v0.5.1) is next; H.1–H.7
+   must finish before Phase 4.
 3. `docs/SESSION.md` — current status snapshot and the "known stubs" list (do not ship
    items). Kept up to date at the end of every phase; trust it over memory.
 4. `docs/CHANGELOG.md` — what shipped in each version, in more implementation detail
    than SESSION.md.
-5. `AGENTS.md` — **this is Next.js 16, not the Next.js in your training data.** Read the
-   bundled guide in `node_modules/next/dist/docs/` before writing code that touches
-   routing, metadata, or forms. Phase 4 is dynamic routes end to end — read
-   `generate-static-params.md` and `dynamic-routes.md` before 4.1, not during.
+5. `AGENTS.md` — repository boundary, session protocol, and the warning that this is
+   Next.js 16. Read the relevant bundled guide before touching loading, routing,
+   metadata, forms, or build behavior.
 
 Don't start work by re-deriving context that's already written down in one of the five
 files above. If something in this handoff conflicts with the plan or the PRD, the plan
 and PRD win — this file is a summary, not the source of truth.
+
+---
+
+## Start here — H.1, not Phase 4
+
+The production-readiness review found that the architecture is sound but the quality gate
+is shallower than its documentation, the conversion boundary leaks future server
+configuration into browser payloads, failed forms log raw PII, trust claims can ship
+without verification, structured-data nodes are unsafe/disconnected, and no tests or CI
+enforce the acceptance criteria.
+
+Phase H addresses those risks before the framework multiplies routes and niches:
+
+1. **H.1** — runtime schemas and strict content parsing
+2. **H.2** — server-only conversion configuration
+3. **H.3** — lead validation, timeout, and abuse controls
+4. **H.4** — sample/verified content states and production truth gate
+5. **H.5** — JSON-LD safety, connected entities, and indexation
+6. **H.6** — automated tests, browser checks, and GitHub CI
+7. **H.7** — documentation reconciliation and v0.5.1 release
+
+Treat each task as one Codex session. When its acceptance checks pass, commit, update
+`docs/SESSION.md`, and begin the next task in a fresh session. Do not switch sessions in
+the middle of a failing build or partial migration.
 
 ---
 
@@ -53,7 +78,7 @@ that way.
 
 ---
 
-## The one architectural thing Phase 4 has to resolve
+## After hardening: the architectural task Phase 4 must resolve
 
 `src/lib/content.ts` loads pages via static imports into a `PAGES` object:
 
@@ -82,7 +107,7 @@ knowledge.
 
 ---
 
-## Start here: Phase 4.1, then 4.2, then 4.3
+## Phase 4 preview — do not start until H.1–H.7 pass
 
 Read the full Phase 4 section in `docs/IMPLEMENTATION_PLAN.md` — it's short (4.1–4.5).
 Summary:
@@ -104,22 +129,16 @@ Summary:
   every page reachable by 2+ internal links.
 - **4.5** — Commit: `v0.6: dynamic routing for services, locations, and FAQ`.
 
-Work one task at a time, in order. Don't start a task until the previous one's acceptance
-check passes.
+Work one task at a time, in order. This sequence begins only after the v0.5.1 handoff says
+H.7 passed.
 
 ---
 
-## One PRD/plan discrepancy worth surfacing to Rev before Phase 4 goes far
+## Resolved route decision
 
-`FRAMEWORK_PRD.md` §5's route table lists a dedicated `/estimate` page as part of the
-conversion flow, alongside `/thank-you`. `IMPLEMENTATION_PLAN.md` never schedules a task
-for it — it's absent from every phase, including Phase 3 where the conversion layer was
-actually built. Phase 3.2 pointed every primary CTA ("Free Estimate" etc.) at the
-existing `/contact` page instead, since that was the only real destination available
-without inventing a route the plan never asked for. That's a reasonable call, but it's a
-real gap between what the PRD's route table promises and what exists — worth a decision
-from Rev (keep pointing at `/contact`, or add `/estimate` as its own task) rather than
-silently resolving itself. Flagged here rather than acted on unilaterally.
+PRD D11 resolves the old `/estimate` discrepancy: `/contact` is the required v1 estimate
+and inquiry destination. A separate `/estimate` route is optional only when it serves a
+materially different campaign or form intent.
 
 ---
 
@@ -146,9 +165,9 @@ Established in 3.2 — `render` injects `role="button"` onto whatever it wraps, 
 wrong for a genuine navigational `<a href>`. `buttonVariants()` is the plain `cva()`
 className function, already exported from `button.tsx` for this.
 
-**Commit per phase, not per task.** Ask before pushing to `main` — unless Rev has
-already granted standing permission for the current phase in chat, as happened for
-Phase 3. That permission does not automatically carry forward to Phase 4; ask again.
+**Commit at every completed session task.** Rev has granted standing permission for
+reasonable commits and pushes to `ndxtraders/authority-site-generator-gpt`. Never apply
+that permission to the protected upstream repository.
 
 **Never delete a file without asking.** Move it to `Archive/` instead.
 
@@ -204,6 +223,20 @@ not per-niche forks), which is Rev's call, not yours.
 5. **`TestimonialItem.rating` is unset on every testimonial**, so `Review`/
    `AggregateRating` schema is never emitted (PRD §6 wants it). Needs real ratings from
    the business, not a placeholder value.
+6. **Runtime content validation is incomplete.** The loader casts imported JSON, and the
+   validator does not enforce nested section prop schemas. H.1 replaces that boundary.
+7. **Future form configuration crosses the client boundary.** The ContactForm Client
+   Component receives the full conversion object, and the unconfigured failure path logs
+   raw lead fields. H.2 removes both behaviors.
+8. **Lead abuse and failure controls are incomplete.** There are no maximum lengths,
+   provider timeout, bot trap, or documented rate-control owner. H.3.
+9. **Current proof and testimonial content is not verified.** The development sample
+   includes licence/insurance language, numerical statistics, response-time claims, and
+   testimonials that must be sourced or removed. H.4.
+10. **Schema and indexation need correction.** JSON-LD needs safe serialization and
+    connected `@id` references; `/thank-you` must be noindex and leave the sitemap. H.5.
+11. **No automated project tests or CI exist.** H.6 establishes the regression suite
+    before routing and niche expansion.
 
 ---
 
@@ -214,5 +247,8 @@ From the PRD, unchanged:
 1. A new site in an existing niche launches with **zero** changes under `src/`
 2. A plumbing site builds from the same `src/` with a different niche pack and content
 3. Every PRD §10 checklist item passes on the generated roofing site
-4. The validator catches all 25 defect classes in the plan's ledger
+4. Runtime validation and production verification enforce every machine-checkable defect
+   class in the plan's ledger
 5. Lighthouse ≥ 95 across all categories
+6. Server-only conversion values and submitted PII never appear in browser payloads or logs
+7. Validation, tests, browser checks, and production build pass in CI

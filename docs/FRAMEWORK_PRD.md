@@ -1,8 +1,8 @@
 # Authority Site Generator — Product Requirements
 
-**Status:** Approved for v0.3 implementation
-**Version:** PRD v1.0
-**Last updated:** 2026-08-03
+**Status:** Approved through v1.0 implementation
+**Version:** PRD v1.1
+**Last updated:** 2026-08-04
 **Owner:** Rev Vaughn
 
 > **Read this first.** This document is the source of truth for what we are building.
@@ -104,6 +104,59 @@ Framework and first site share one repository until v1.0, then split into
 
 *Rationale:* Splitting before the content API stabilizes means versioning an interface
 that is still changing.
+
+### D7 — Runtime schemas enforce the content contract
+
+TypeScript types alone do not validate imported JSON. Every site, page, section, and
+niche pack must pass runtime schema validation before rendering or building. The runtime
+schema is the executable content contract; TypeScript types must be derived from it when
+practical or protected from drift by equivalence tests.
+
+*Rationale:* The current loader casts JSON through `unknown`, while the validator checks
+only a section's type and whether `props` is an object. Malformed nested props can pass
+validation even though the documentation calls the validator a quality gate.
+
+### D8 — Truth is a launch requirement, not a copy preference
+
+Sample content and verified production content are distinct states. A production launch
+must fail when business identity is incomplete, placeholder data remains, or factual
+trust claims have not been reviewed. Numerical proof, licences, insurance claims,
+warranties, testimonials, ratings, hours, and service claims must be verified or omitted.
+
+*Rationale:* Authority depends on evidence. A technically valid site carrying invented or
+unverified proof is more damaging than an incomplete site that refuses to launch.
+
+### D9 — Conversion secrets and lead data stay server-side
+
+The browser may receive public conversion presentation values such as the display phone
+and thank-you path. Lead-delivery endpoints, credentials, provider tokens, and abuse
+controls are server-only deployment configuration. Submitted personal information is
+validated, bounded, never written to application logs, and sent only to the configured
+provider.
+
+*Rationale:* Passing the full conversion object through a Client Component serializes the
+future form endpoint into the browser payload. Logging a failed submission also creates
+unnecessary retention of names, phone numbers, email addresses, and project details.
+
+### D10 — Structured data is one safe, connected entity graph
+
+JSON-LD uses stable `@id` values to connect the business, website, services, reviews, and
+ratings. User- or AI-authored strings are safely serialized before insertion into a
+script element. Schema nodes that cannot be supported by verified content are omitted.
+
+*Rationale:* Emitting disconnected nodes satisfies a type checklist without clearly
+describing one entity. Unsafe script serialization also turns future generated content
+into an avoidable injection surface.
+
+### D11 — `/contact` is the required v1 conversion destination
+
+The v1 framework uses `/contact` for estimate and inquiry CTAs and `/thank-you` for the
+post-submit confirmation. A separate `/estimate` route is optional only when a niche or
+campaign has a materially different form or intent; it is not required for v1.
+
+*Rationale:* Two identical form pages create maintenance and canonicalization risk without
+improving the visitor journey. The current implementation already uses `/contact` as the
+single real destination.
 
 ---
 
@@ -216,12 +269,19 @@ type Section =
 
 A build-time validator runs before `next build` and **fails the build** on:
 
+- Any site, page, section, or niche object that fails its runtime schema
+- Missing required nested props, invalid field types or formats, and unknown section props
 - Any page missing `seo.title`, `seo.description`, or `canonicalPath`
 - Duplicate `title` or `canonicalPath` across pages
 - A `sections` entry whose `type` is not in the registry
 - Placeholder content — `555-5555`, `Content coming soon`, `Lorem`, `TODO`
 - A location page with no locally specific content (see §7)
 - An `internalLinks` target that does not resolve to a real page
+- A slug, page type, canonical path, or schema declaration inconsistent with its route
+
+A separate production-readiness check fails when sample content is still active,
+required NAP fields are incomplete, or factual trust claims have not been reviewed. A
+development build may use clearly marked sample content; a production deployment may not.
 
 *Rationale:* Every one of these is a real defect found in the two reference sites or
 the current build. Detection must be automatic, because manual review demonstrably
@@ -240,8 +300,8 @@ does not catch them.
 | `/service-area/[slug]` | `locations/*.json` | Local page — hub-and-spoke spoke |
 | `/faq` | generated | AEO hub |
 | `/faq/[slug]` | `faq/*.json` | One question per page |
-| `/about` `/contact` | `pages/*.json` | Trust and conversion |
-| `/estimate` `/thank-you` | `pages/*.json` | Conversion flow |
+| `/about` | `pages/*.json` | Trust |
+| `/contact` `/thank-you` | `pages/*.json` | Conversion flow |
 | Legal set | generated from `site.json` | Trust and compliance |
 
 ### Legal set
@@ -272,6 +332,10 @@ existing hubs, and commercial value — **not** by exact-match domain availabili
 - Every page emits a **self-referencing** canonical derived from `canonicalPath`
 - Open Graph and Twitter tags derive from the same source
 - `sitemap.xml` is **generated by enumerating content files**, never hand-maintained
+- Non-indexable utility pages, including `/thank-you`, are excluded from the sitemap and
+  emit `noindex`
+- Sitemap modification dates are accurate content dates or omitted; a deployment time is
+  not presented as a content update
 - `robots.txt` and `manifest.webmanifest` derive from `site.json`
 - Site URL comes from one field; the domain string appears exactly once in the codebase
 
@@ -293,6 +357,10 @@ existing hubs, and commercial value — **not** by exact-match domain availabili
 `LocalBusiness` must include `name`, `telephone`, `email`, `url`, full `address`,
 `geo`, `openingHours`, `areaServed`, `priceRange`, and `sameAs`. The `@type` comes from
 the niche pack (`RoofingContractor`, `Plumber`, `Locksmith`).
+
+The business, website, services, reviews, and ratings reference stable `@id` values so
+they form one graph. Review and rating nodes identify what was reviewed. JSON-LD is
+serialized so content cannot terminate the script element.
 
 *Current defect this replaces:* one hardcoded `LocalBusiness` literal, emitted
 identically on every page, with no address or hours, ignoring the `schema.businessType`
@@ -321,6 +389,9 @@ Adapted from the anti-thin gate. Enforced by the validator in §4, not by review
 3. Duplicates another page's title or canonical
 4. Has no internal link to a related page
 5. Has no call-to-action
+6. Makes an unreviewed factual trust claim about the business
+7. Uses a testimonial, rating, licence, insurance, warranty, service-hours, or numerical
+   proof claim that has not been verified or explicitly removed
 
 ### The local knowledge requirement
 
@@ -348,6 +419,15 @@ Every site must ship with:
 - **Thank-you page** — a real URL, so conversions are trackable
 - **Trust stack on money pages** — reviews, license number, warranty, insurance
 - **GBP alignment** — NAP identical to the Google Business Profile
+
+The quote form must also:
+
+- Read its endpoint and credentials only from server-side deployment configuration
+- Validate required values, formats, and maximum lengths on the server
+- Apply a documented spam and rate-control strategy before public launch
+- Use a bounded provider request with explicit timeout and failure handling
+- Never log raw lead fields or expose provider configuration in browser payloads
+- Redirect only to a validated internal path after confirmed delivery
 
 *Current defects this replaces:* the contact form resolves a 600ms timer and reports
 success for a lead that was never captured; no `tel:` link exists anywhere; the header
@@ -395,9 +475,13 @@ the primary acceptance criterion for v1.0. If it fails, the niche layer is under
 Every generated site is reviewed against this. It is also the validator's spec.
 
 **Architecture** — Reusable · JSON-driven · Typed · Mobile · Accessible
+**Validation** — Runtime schemas · Strict nested props · Resolved links · Production gate
 **SEO** — Metadata · Sitemap · Schema · Canonicals · Internal links
 **Local SEO** — Service areas · GBP alignment · FAQs · Reviews · Entity signals
 **AEO** — Question coverage · AI-friendly structure · Helpful content · Semantic organization
+**Trust** — Verified claims · Authentic testimonials · Complete NAP · Legal review
+**Security** — Server-only secrets · No PII logs · Bounded inputs · Abuse controls
+**Quality engineering** — Unit tests · Build integration tests · CI · Browser checks
 
 Items that can be machine-checked must be machine-checked. Human review is reserved for
 content quality and local knowledge depth, which cannot be automated.
@@ -411,6 +495,7 @@ content quality and local knowledge depth, which cannot be automated.
 | **v0.3** | Content model + section registry + validator | Pages carry unique metadata; no hardcoded copy in React; validator fails on thin content |
 | **v0.4** | SEO and schema engine | All schema types generate from content; sitemap enumerates automatically; domain appears once |
 | **v0.5** | Conversion layer | Working form, click-to-call, call tracking, thank-you page, legal set |
+| **v0.5.1** | Production hardening | Runtime schemas, safe conversion boundary, truth gate, connected schema, tests and CI |
 | **v0.6** | Hub-and-spoke routing | Service, location, and FAQ dynamic routes with real content |
 | **v0.7** | Niche packs | Roofing and locksmith packs; plumbing site generated from same code |
 | **v1.0** | Production | Design system on tokens; accessibility pass; Lighthouse ≥ 95; docs complete |
@@ -422,6 +507,10 @@ content quality and local knowledge depth, which cannot be automated.
 3. A new niche requires a niche pack and, at most, one new section component
 4. All quality checklist items pass on the generated roofing site
 5. Validator catches every defect class listed in §4
+6. Production verification rejects sample, incomplete, or unreviewed business content
+7. No lead endpoint, credential, or submitted personal information appears in browser
+   payloads or application logs
+8. Required unit, integration, browser, and build checks pass in CI
 
 ---
 
@@ -436,6 +525,8 @@ Explicitly out of scope for v1.0. Recorded so they don't get rebuilt by accident
 - E-commerce or booking
 - Non-English localization
 - Automated market research or domain purchasing
+- Automated determination that a real-world business claim is true; the framework can
+  require evidence and review, but a human remains accountable for verification
 - Anything from `SYSTEMS_THINKING.md` not explicitly promoted here
 
 ---
@@ -454,6 +545,8 @@ Explicitly out of scope for v1.0. Recorded so they don't get rebuilt by accident
 | **Answer-first block** | Direct 2–3 sentence answer before elaboration. Cited by AI. |
 | **Local knowledge layer** | Market-specific facts a generic model cannot produce. The moat. |
 | **Anti-thin gate** | Validator rules preventing empty or generic pages from shipping. |
+| **Production gate** | Checks that prevent sample, incomplete, or unreviewed content from deployment. |
+| **Verified claim** | A factual business claim reviewed against an identified source and approved for publication. |
 | **Section registry** | Map of section type string to React component. |
 
 ---
@@ -465,7 +558,7 @@ Explicitly out of scope for v1.0. Recorded so they don't get rebuilt by accident
 | `FRAMEWORK_PRD.md` | **This file.** What we're building. Source of truth. |
 | `AUTHORITY_MODEL.md` | Strategy. Why authority precedes lead generation. |
 | `SYSTEMS_THINKING.md` | Parking lot. Ideas not yet adopted. Non-binding. |
-| `IMPLEMENTATION_PLAN.md` | How to build v0.3–v0.7. Disposable. |
+| `IMPLEMENTATION_PLAN.md` | How to build v0.3–v1.0, including session boundaries. Disposable. |
 | `CHANGELOG.md` | What shipped. |
 | Per-site brief | One page per site: business, market, domain, niche, local knowledge notes. |
 
