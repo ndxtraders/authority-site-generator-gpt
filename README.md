@@ -11,6 +11,7 @@ The framework is the product. Individual websites are outputs.
 
 If you are an AI agent or a new contributor, read in this order:
 
+0. **`docs/HANDOFF.md`** — if you are picking up the build, start here.
 1. **`docs/FRAMEWORK_PRD.md`** — what we're building. **Source of truth.**
 2. `docs/AUTHORITY_MODEL.md` — why. The strategy behind the architecture.
 3. `docs/IMPLEMENTATION_PLAN.md` — the current build plan and phase.
