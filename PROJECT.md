@@ -1,354 +1,195 @@
-PROJECT 
-Project Version: v0.1.0 (Framework Prototype)
-\# LeadGen Framework Project
+# Authority Site Generator
 
-\#\# Vision
+**Version:** v0.2 shipped, v0.3 in progress
+**Status:** Active development
+**First market:** Modesto, CA (roofing)
 
-This repository is being built as a reusable framework for local lead generation websites.
+> This document holds the **vision and architectural constitution**.
+> For specifications, see `docs/FRAMEWORK_PRD.md` — it is the source of truth.
+> For current tasks, see `docs/IMPLEMENTATION_PLAN.md`.
 
-Although this repository is currently named \`roof-repair-modesto\`, the long-term goal is not to build a single roofing website. The goal is to build a reusable system that can power roofing, plumbing, HVAC, electrical, concrete, landscaping, and other local service businesses by changing only the content.
+---
 
-Eventually the framework itself may become its own repository (\`leadgen-framework\`) while individual city sites become separate repositories using the same codebase.
+## Vision
 
-\---
+The purpose of this framework is not simply to generate lead generation websites.
 
-\# Core Philosophy
+Its purpose is to generate **Local Authority Websites** for service businesses.
 
-Everything should be:
+A Local Authority Website is designed to become the most trusted online resource for a
+specific trade within a defined geographic market. Lead generation is the outcome of
+becoming the local authority — not the primary objective.
 
-\- Reusable  
-\- Data-driven  
-\- Easy to maintain  
-\- SEO-friendly  
-\- Fast  
-\- Accessible  
-\- Easy to clone for new businesses
+The framework therefore prioritizes:
 
-The objective is to create new microsites by replacing content rather than rewriting React components.
+- Expertise
+- Helpfulness
+- Local knowledge
+- Entity development
+- Topical authority
+- User trust
+- Technical excellence
+- AI readability
+- Long-term search visibility
 
-\---
+Every website generated should answer one question affirmatively:
 
-\# Architecture Principles
+> "If I lived in this community and needed this service, would this be the most helpful
+> website available?"
 
-\#\# Rule 1
+The strategy behind this is in `docs/AUTHORITY_MODEL.md`.
 
-No hardcoded business information inside reusable components.
+---
+
+## Core philosophy
+
+Everything should be reusable, data-driven, easy to maintain, SEO-friendly, fast,
+accessible, and easy to clone for a new business.
+
+**New sites are created by replacing content, not by rewriting React components.**
+
+---
+
+## Architecture principles
+
+These seven rules are the constitution. Code that violates one is a bug.
+
+### Rule 1 — No hardcoded business information in reusable components
 
 Business name, city, services, branding, metadata, and page copy belong in content.
 
-\---
+### Rule 2 — Components receive props
 
-\#\# Rule 2
+Components never import content directly.
 
-Components receive props.
+```
+Page → Content → Props → Component
+```
 
-Components should not import \`site.json\`.
+### Rule 3 — Pages orchestrate, components render
 
-Instead:
+Pages assemble sections. Sections render content.
 
-Page
+### Rule 4 — Every component passes the reuse test
 
-↓
-
-Content
-
-↓
-
-Props
-
-↓
-
-Component
-
-\---
-
-\#\# Rule 3
-
-Pages orchestrate.
-
-Components render.
-
-Pages assemble sections.
-
-Sections render content.
-
-\---
-
-\#\# Rule 4
-
-Every component should pass this test:
-
-"Could this component be reused unchanged for a plumber?"
+> "Could this component be reused unchanged for a plumber?"
 
 If not, redesign it.
 
-\---
+### Rule 5 — Only one layer knows where content comes from
 
-\#\# Rule 5
+Today that layer reads `content/`. Tomorrow it might read a CMS, a database, markdown, or
+an API. Components must not care.
 
-Only one layer should know where the content comes from.
+### Rule 6 — Never repeat Tailwind class strings
 
-Today:
+If the same layout appears twice, extract a component. `Container`, `Section`,
+`SectionHeading`.
 
-content/site.json
+### Rule 7 — Keep responsibilities separated
 
-Tomorrow:
+| Directory | Owns |
+|---|---|
+| `src/components/layout/` | Shared site layout |
+| `src/components/sections/` | Page sections |
+| `src/components/common/` | Layout primitives |
+| `src/components/ui/` | shadcn components |
+| `src/lib/` | Utilities, content loading, SEO, schema |
+| `src/types/` | TypeScript models |
+| `content/` | Site content |
+| `niches/` | Per-trade configuration |
 
-CMS
+---
 
-Database
+## Content philosophy
 
-Markdown
+**Content is treated as an API.** Every visible piece of text comes from `content/`.
 
-API
+React components should contain no marketing copy.
 
-The components should not care.
+---
 
-\---
+## Framework vs. content
 
-\#\# Rule 6
+| Framework owns | Content owns |
+|---|---|
+| React components | Business information and NAP |
+| Layout and navigation | Branding values |
+| SEO engine | All copy |
+| Schema generation | Service descriptions |
+| Rendering and routing | FAQs and testimonials |
+| Design system | Service areas |
+| Utilities and TypeScript models | Images and metadata values |
 
-Avoid repeating Tailwind class strings.
+Application code should rarely change between sites.
 
-If the same layout appears multiple times, create a reusable component.
+---
 
-Examples:
+## Technology
 
-Container
+Next.js 16 (App Router, Turbopack) · TypeScript · Tailwind CSS v4 · shadcn/ui ·
+Lucide Icons · JSON content · GitHub · Vercel
 
-Section
+> **This is not the Next.js in your training data.** Read the relevant guide in
+> `node_modules/next/dist/docs/` before writing code. See `AGENTS.md`.
 
-SectionHeading
+---
 
-\---
+## Geographic strategy
 
-\#\# Rule 7
+The framework uses a hub-and-spoke model. Large cities become hub sites with their own
+domains; surrounding communities become service-area pages within the nearest hub. When a
+spoke market grows large enough, it graduates to its own hub.
 
-Keep responsibilities separated.
+Expansion is driven by search demand, competition, population, distance from existing
+hubs, and commercial value — not by buying every available exact-match domain.
 
-layout/
+Details in `docs/FRAMEWORK_PRD.md` §5.
 
-Shared site layout
+---
 
-sections/
+## Long-term repository strategy
 
-Homepage and page sections
+This repository currently serves as both the application and the framework. After the
+content API stabilizes at v1.0, it may split:
 
-common/
+- **`leadgen-framework`** — components, rendering engine, SEO, schema, design system
+- **`leadgen-content-generator`** — AI prompts, content generation, validation
+- **Business repositories** — `content/`, `public/`, branding, deployment config
 
-Shared layout primitives
+Recorded as PRD decision D6.
 
-ui/
+---
 
-shadcn components
+## Code quality
 
-lib/
+Prefer small components, strong TypeScript types, reusable sections, meaningful commits,
+clean git history, no duplicated logic, and readable code over clever code.
 
-Utilities
+Avoid premature abstraction, but build intentionally toward reusable systems rather than
+one-off solutions. When making an architectural decision, ask:
 
-types/
+> "Will this make every future site easier to build?"
 
-TypeScript models
+---
 
-content/
+## Guiding principle
 
-Site content
+We are not building roofing websites.
 
-\---
+We are building a machine that builds roofing websites.
 
-\# Content Philosophy
+**The framework is the product. Individual websites are outputs of the framework.**
 
-Content is treated as an API.
+---
 
-The goal is that every visible piece of text comes from JSON.
+## Where to go next
 
-Eventually content/site.json should contain:
-
-\- business  
-\- branding  
-\- seo  
-\- navigation  
-\- hero  
-\- services  
-\- whyChooseUs  
-\- faq  
-\- testimonials  
-\- cta  
-\- footer  
-\- schema
-
-React components should contain little or no marketing copy.
-
-\---
-
-\# Technology Stack
-
-Next.js
-
-TypeScript
-
-Tailwind CSS
-
-shadcn/ui
-
-Lucide Icons
-
-GitHub
-
-Vercel Pro
-
-JSON content
-
-\---
-
-\# Future Folder Structure
-
-src/
-
-app/
-
-components/
-
-layout/
-
-sections/
-
-common/
-
-ui/
-
-lib/
-
-seo/
-
-schema/
-
-utils/
-
-types/
-
-content/
-
-public/
-
-docs/
-
-\---
-
-\# Long-Term Goal
-
-Launching a new lead generation site should require little more than:
-
-1\. Clone repository
-
-2\. Replace content/site.json
-
-3\. Replace images
-
-4\. Deploy
-
-No React code should need to change.
-
-\---
-
-\# Future Vision
-
-Eventually this framework should generate:
-
-\- Dynamic metadata  
-\- LocalBusiness schema  
-\- FAQ schema  
-\- Service schema  
-\- Breadcrumb schema  
-\- XML sitemap  
-\- robots.txt  
-\- Open Graph images  
-\- Contact forms  
-\- Thank-you pages  
-\- Analytics  
-\- Call tracking placeholders
-
-from the content model.
-
-\---
-
-\# Code Quality
-
-Prefer:
-
-Small components
-
-Strong TypeScript types
-
-Reusable sections
-
-Meaningful commits
-
-Clean Git history
-
-No duplicated logic
-
-Readable code over clever code
-
-\---
-
-\# Current Progress
-
-Completed:
-
-✓ Next.js setup
-
-✓ GitHub repository
-
-✓ Vercel-ready
-
-✓ JSON content loading
-
-✓ TypeScript models
-
-✓ Shared layout
-
-✓ Header
-
-✓ Footer
-
-✓ Hero component
-
-✓ shadcn/ui
-
-In Progress:
-
-Reusable section architecture
-
-Next:
-
-Container
-
-Section
-
-SectionHeading
-
-Service cards
-
-FAQ
-
-CTA
-
-SEO engine
-
-Schema generation
-
-\---
-
-\# Notes for Future Sessions
-
-Continue building the LeadGen Framework.
-
-Favor reusable architecture over quick solutions.
-
-Avoid hardcoded business content.
-
-Treat this project as a professional software product rather than a single website.
-
-Always recommend architectural improvements when they increase maintainability or scalability without introducing unnecessary complexity.
-
+| Document | Purpose |
+|---|---|
+| `docs/FRAMEWORK_PRD.md` | **Source of truth.** What we're building. |
+| `docs/AUTHORITY_MODEL.md` | Strategy. Why authority precedes lead generation. |
+| `docs/IMPLEMENTATION_PLAN.md` | Current build plan, phase by phase. |
+| `docs/SYSTEMS_THINKING.md` | Parking lot. Non-binding ideas. |
+| `docs/AI_GUIDELINES.md` | Hard rules for writing code here. |
+| `docs/CHANGELOG.md` | What shipped. |

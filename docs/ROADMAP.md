@@ -1,91 +1,34 @@
-ROADMAP
+# Roadmap
 
-Version 0.1
+> **Superseded.** The authoritative version plan is `FRAMEWORK_PRD.md` §11, with the
+> task-level breakdown in `IMPLEMENTATION_PLAN.md`. This file is kept as a short
+> orientation summary only.
 
-✔ Next.js
+## Shipped
 
-✔ JSON
+**v0.1** — Next.js foundation, JSON content loading, TypeScript models, shared layout,
+Header, Footer, Hero, shadcn/ui.
 
-✔ Hero
+**v0.2** — Reusable section architecture: `Container`, `Section`, `SectionHeading`, plus
+nine trade-agnostic section components and three additional routes.
 
-✔ Layout
+## Planned
 
-\------------------
+| Version | Theme |
+|---|---|
+| v0.3 | Page-based content model, section registry, content validator |
+| v0.4 | SEO engine — metadata, schema generation, generated sitemap and robots |
+| v0.5 | Conversion layer — working form, click-to-call, legal pages, mobile nav |
+| v0.6 | Hub-and-spoke routing — services, locations, FAQ |
+| v0.7 | Niche packs — roofing and locksmith; plumbing site as proof |
+| v1.0 | Production — design tokens, accessibility, performance |
 
-Version 0.2
+See `FRAMEWORK_PRD.md` §11 for the "done when" criteria on each.
 
-□ Services
+## Beyond v1.0
 
-□ CTA
+Split into `leadgen-framework`, `leadgen-content-generator`, and per-business content
+repositories. Business repos contain only `content/`, `public/`, branding assets, and
+deployment configuration. Framework updates become consumable by every site.
 
-□ FAQ
-
-□ SEO
-
-\------------------
-
-Version 0.3
-
-□ Contact Forms
-
-□ Analytics
-
-□ Images
-
-\# Version 1.x
-
-Complete LeadGen Framework.
-
-Goals:
-
-\- Stable component library  
-\- Stable content schema  
-\- Dynamic metadata  
-\- Dynamic schema  
-\- Production deployment
-
-\---
-
-\# Version 2.x
-
-Split the project into two repositories.
-
-Repository 1
-
-leadgen-framework
-
-Contains:
-
-\- React components  
-\- Next.js application  
-\- SEO engine  
-\- JSON schema  
-\- Utilities  
-\- Documentation
-
-Repository 2+
-
-Business repositories
-
-Examples:
-
-roof-repair-modesto
-
-roof-repair-stockton
-
-plumber-modesto
-
-electrician-stockton
-
-Each business repository contains only:
-
-content/
-
-public/
-
-branding assets
-
-deployment configuration
-
-Framework updates should be consumable by every business repository.
-
+Recorded as PRD decision D6.

@@ -2,20 +2,21 @@ import { site } from "@/lib/site";
 
 export default function Footer() {
   return (
-    <footer className="mt-24 border-t bg-slate-900">
-      <div className="mx-auto max-w-7xl px-6 py-16 text-slate-300">
-        <h3 className="text-2xl font-bold text-white">
-          {site.business.name}
-        </h3>
+    <footer className="border-t border-slate-800 bg-slate-900">
+      <div className="mx-auto max-w-7xl px-6 py-16 text-slate-300 lg:px-8">
+        <h3 className="text-2xl font-semibold text-white">{site.business.name}</h3>
 
-        <p className="mt-4 max-w-xl">
-          Professional {site.business.primaryService.toLowerCase()} services
-          throughout {site.business.region}.
+        <p className="mt-4 max-w-xl text-sm leading-7 text-slate-400">
+          {site.footer.headline}
         </p>
 
-        <p className="mt-10 text-sm text-slate-500">
-          © {new Date().getFullYear()} {site.business.name}
-        </p>
+        <div className="mt-8 flex flex-col gap-2 text-sm text-slate-400 sm:flex-row sm:items-center sm:gap-6">
+          <span>{site.business.phone}</span>
+          <span>{site.business.email}</span>
+          <span>{site.business.region}</span>
+        </div>
+
+        <p className="mt-10 text-sm text-slate-500">{site.footer.copyright}</p>
       </div>
     </footer>
   );

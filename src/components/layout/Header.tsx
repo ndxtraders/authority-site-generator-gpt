@@ -5,13 +5,10 @@ import { Button } from "@/components/ui/button";
 
 export default function Header() {
   return (
-    <header className="border-b bg-white">
-      <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-6">
+    <header className="border-b border-slate-200 bg-white/95 backdrop-blur">
+      <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-6 lg:px-8">
         <div>
-          <Link
-            href="/"
-            className="text-2xl font-bold tracking-tight text-slate-900"
-          >
+          <Link href="/" className="text-xl font-semibold tracking-tight text-slate-900">
             {site.business.name}
           </Link>
 
@@ -21,16 +18,14 @@ export default function Header() {
         </div>
 
         <nav className="hidden items-center gap-8 md:flex">
-          <Link href="/">Home</Link>
-
-          <Link href="/services">Services</Link>
-
-          <Link href="/about">About</Link>
-
-          <Link href="/contact">Contact</Link>
+          {site.navigation.links.map((link) => (
+            <Link key={link.href} href={link.href} className="text-sm font-medium text-slate-600 hover:text-slate-900">
+              {link.label}
+            </Link>
+          ))}
         </nav>
 
-        <Button>Free Estimate</Button>
+        <Button>{site.navigation.cta}</Button>
       </div>
     </header>
   );
