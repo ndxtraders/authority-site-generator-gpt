@@ -196,6 +196,10 @@ migration.
 - H.6 checks passed: validation (5 pages, 9 expected warnings), lint, TypeScript, 84 unit
   tests, a 16-route production build, 5 build integration checks, and 2 Chromium tests.
   Production verification still fails on the same 39 documented blockers, as required.
+- `npm audit --omit=dev` reports one moderate Hono advisory and three high advisories in
+  Next's bundled PostCSS/Sharp dependency chain. npm's complete fix moves pinned Next
+  16.2.12 to 16.3.0, so do not apply `npm audit fix --force` casually; handle the Next
+  upgrade as a separately scoped, fully verified task.
 
 ---
 
@@ -405,6 +409,10 @@ not per-niche forks), which is Rev's call, not yours.
 11. **The H.6 regression suite and CI are complete.** Preserve the shared validator
     fixtures, sentinel production-build assertions, Playwright checks, and the single
     `npm run verify` command as routing and niche coverage expand.
+12. **Production dependency advisories remain.** `npm audit --omit=dev` reports current
+    Hono, bundled PostCSS, and Sharp advisories. The offered full fix upgrades pinned Next
+    16.2.12 to 16.3.0; review the matching bundled Next 16 documentation and run the full
+    verification suite in a separately scoped upgrade rather than forcing it into H.7.
 
 ---
 

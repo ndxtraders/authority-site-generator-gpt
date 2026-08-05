@@ -213,6 +213,10 @@ H.6 verification results:
 - Playwright Chromium suite — passed, 2/2 at 375px
 - `npm run verify:production` — failed as required with the same 39 documented real-world
   blockers; current sample content remains impossible to mistake for production-ready
+- `npm audit --omit=dev` — reported 4 upstream production advisories (1 moderate, 3
+  high); npm's complete fix upgrades pinned Next 16.2.12 to 16.3.0, so dependency
+  remediation is recorded for a separately scoped framework upgrade rather than forced
+  into H.6
 
 ## Next — exact starting point
 
@@ -237,6 +241,9 @@ recorded source and accountable human reviewer required by `docs/DEPLOYMENT.md`.
 - Review/AggregateRating schema is connected and safely gated, but current content has no
   verified ratings to emit
 - Starter assets remain and real, rights-cleared production images are still required
+- The production dependency audit reports current Hono, bundled PostCSS, and Sharp
+  advisories; the available full remediation changes the pinned Next version and requires
+  a separately scoped upgrade with Next 16 documentation review and full verification
 
 ## Session checkpoint rule
 
