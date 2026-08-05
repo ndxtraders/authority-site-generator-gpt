@@ -736,6 +736,12 @@ record the exact dependency rather than fabricating content. Otherwise start H.5
 
 **Commit:** `v0.5.1 H5: harden schema and indexation`
 
+> **Implementation note.** Schema.org's validator found that `serviceType` is valid on
+> the `Service` node but not on `HomeAndConstructionBusiness`. H.5 removed it from
+> `LocalBusiness` while retaining it on `Service`. The representative connected graph
+> then passed the official validator with 0 errors and 0 warnings across BreadcrumbList,
+> WebSite, Service, Review, AggregateRating, and FAQPage.
+
 **Session boundary:** start H.6 in a fresh task.
 
 ### H.6 — Add automated tests and CI

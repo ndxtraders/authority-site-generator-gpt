@@ -4,7 +4,8 @@
   "seo": {
     "title": "Thank You | Roof Repair Modesto",
     "description": "Your request has been received. Roof Repair Modesto will follow up shortly.",
-    "canonicalPath": "/thank-you"
+    "canonicalPath": "/thank-you",
+    "indexable": false
   },
   "schema": [],
   "internalLinks": ["/services", "/about"],

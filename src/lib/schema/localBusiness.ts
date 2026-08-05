@@ -1,4 +1,5 @@
 import type { SiteConfig } from "@/types/site";
+import { businessEntityId } from "./entity.ts";
 import type { JsonLdGraph } from "./types";
 
 export interface LocalBusinessOptions {
@@ -38,13 +39,13 @@ export function buildLocalBusiness(
 
   const graph: JsonLdGraph = {
     "@type": site.schema.businessType,
+    "@id": businessEntityId(site),
     name: business.name,
     telephone: business.phone,
     email: business.email,
     url: site.url,
     address,
     areaServed: options.areaServed ?? business.region,
-    serviceType: business.primaryService,
   };
 
   if (business.geo.latitude && business.geo.longitude) {

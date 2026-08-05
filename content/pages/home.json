@@ -4,7 +4,8 @@
   "seo": {
     "title": "Roof Repair Modesto | Reliable Roofing Services",
     "description": "Professional roof repair, replacement, and inspection services for homes in Modesto and surrounding areas.",
-    "canonicalPath": "/"
+    "canonicalPath": "/",
+    "indexable": true
   },
   "schema": ["WebSite"],
   "internalLinks": ["/services", "/about", "/contact"],

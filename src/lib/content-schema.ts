@@ -354,6 +354,7 @@ export const PageContentSchema = z
         title: nonEmptyString,
         description: nonEmptyString,
         canonicalPath: rootRelativePath,
+        indexable: z.boolean(),
         ogImage: rootRelativePath.optional(),
       })
       .strict(),

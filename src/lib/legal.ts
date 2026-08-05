@@ -44,6 +44,7 @@ function buildPage(slug: LegalSlug, site: SiteConfig, description: string): Page
       title: `${TITLES[slug]} | ${site.business.name}`,
       description,
       canonicalPath: `/${slug}`,
+      indexable: true,
     },
     schema: [],
     sections: [],

@@ -19,7 +19,7 @@ import type { PageContent } from "@/types/page";
  */
 export function buildPageMetadata(page: PageContent): Metadata {
   const site = getSite();
-  const { title, description, canonicalPath, ogImage } = page.seo;
+  const { title, description, canonicalPath, indexable, ogImage } = page.seo;
 
   return {
     title,
@@ -27,6 +27,16 @@ export function buildPageMetadata(page: PageContent): Metadata {
     alternates: {
       canonical: canonicalPath,
     },
+    robots: indexable
+      ? undefined
+      : {
+          index: false,
+          follow: true,
+          googleBot: {
+            index: false,
+            follow: true,
+          },
+        },
     openGraph: {
       title,
       description,

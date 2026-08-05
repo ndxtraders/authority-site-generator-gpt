@@ -4,7 +4,8 @@
   "seo": {
     "title": "Contact Us | Roof Repair Modesto",
     "description": "Get in touch with Roof Repair Modesto for a free estimate, a roof inspection, or an emergency service request.",
-    "canonicalPath": "/contact"
+    "canonicalPath": "/contact",
+    "indexable": true
   },
   "schema": [],
   "internalLinks": ["/services", "/about"],

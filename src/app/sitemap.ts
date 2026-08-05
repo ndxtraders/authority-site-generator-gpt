@@ -16,8 +16,9 @@ import { absoluteUrl } from "@/lib/url";
 export default function sitemap(): MetadataRoute.Sitemap {
   const pages = [...getAllPages(), ...getAllLegalPages(getSite()).map((legal) => legal.page)];
 
-  return pages.map((page) => ({
-    url: absoluteUrl(page.seo.canonicalPath),
-    lastModified: new Date(),
-  }));
+  return pages
+    .filter((page) => page.seo.indexable)
+    .map((page) => ({
+      url: absoluteUrl(page.seo.canonicalPath),
+    }));
 }

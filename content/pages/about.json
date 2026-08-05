@@ -4,7 +4,8 @@
   "seo": {
     "title": "About Us | Roof Repair Modesto",
     "description": "Learn more about Roof Repair Modesto and the local service experience behind every roofing project we take on.",
-    "canonicalPath": "/about"
+    "canonicalPath": "/about",
+    "indexable": true
   },
   "schema": [],
   "internalLinks": ["/services", "/contact"],

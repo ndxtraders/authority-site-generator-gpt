@@ -1,5 +1,5 @@
-import { absoluteUrl } from "@/lib/url";
-import type { Business } from "@/types/site";
+import type { SiteConfig } from "@/types/site";
+import { businessEntityId, pageEntityId, schemaAbsoluteUrl } from "./entity.ts";
 import type { JsonLdGraph } from "./types";
 
 export interface ServiceInput {
@@ -18,17 +18,17 @@ export interface ServiceInput {
  * `pageType: "service"`, using that page's own seo.title/description as the
  * service name/description.
  */
-export function buildService(business: Business, service: ServiceInput): JsonLdGraph {
+export function buildService(site: SiteConfig, service: ServiceInput): JsonLdGraph {
+  const { business } = site;
+
   return {
     "@type": "Service",
+    "@id": pageEntityId(site, service.path, "service"),
     name: service.name,
     description: service.description,
-    url: absoluteUrl(service.path),
+    url: schemaAbsoluteUrl(site, service.path),
     serviceType: business.primaryService,
-    provider: {
-      "@type": "LocalBusiness",
-      name: business.name,
-    },
+    provider: { "@id": businessEntityId(site) },
     areaServed: business.region,
   };
 }

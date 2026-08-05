@@ -58,7 +58,8 @@
         "seo": {
           "title": "Authority Contractors",
           "description": "Property repair services for local homes.",
-          "canonicalPath": "/"
+          "canonicalPath": "/",
+          "indexable": true
         },
         "schema": ["WebSite"],
         "internalLinks": [],

@@ -1,15 +1,20 @@
 import type { PageContent } from "@/types/page";
 import type { SiteConfig } from "@/types/site";
 
-import { buildLocalBusiness } from "./localBusiness";
-import { buildBreadcrumbList } from "./breadcrumb";
-import { buildFAQPage } from "./faq";
-import { buildReviewGraphs } from "./review";
-import { buildWebSite } from "./website";
-import { buildService } from "./service";
+import { buildLocalBusiness } from "./localBusiness.ts";
+import { buildBreadcrumbList } from "./breadcrumb.ts";
+import { buildFAQPage } from "./faq.ts";
+import { buildReviewGraphs } from "./review.ts";
+import { buildWebSite } from "./website.ts";
+import { buildService } from "./service.ts";
 import type { JsonLdGraph } from "./types";
 
-export type { JsonLdGraph } from "./types";
+export type { JsonLdGraph } from "./types.ts";
+
+export interface BuildSchemaOptions {
+  /** Verified location name supplied by Phase 4 location content. */
+  areaServed?: string;
+}
 
 /**
  * Build every schema.org graph a page should emit, per PRD §6.
@@ -26,15 +31,24 @@ export type { JsonLdGraph } from "./types";
  *   page-level intent (only home is a WebSite; only a `pageType: "service"`
  *   page is a Service) rather than being inferable from sections alone.
  */
-export function buildSchema(page: PageContent, site: SiteConfig): JsonLdGraph[] {
-  const graphs: JsonLdGraph[] = [buildLocalBusiness(site), buildBreadcrumbList(page)];
+export function buildSchema(
+  page: PageContent,
+  site: SiteConfig,
+  options: BuildSchemaOptions = {},
+): JsonLdGraph[] {
+  const graphs: JsonLdGraph[] = [
+    buildLocalBusiness(site, { areaServed: options.areaServed }),
+    buildBreadcrumbList(page, site),
+  ];
 
   for (const section of page.sections) {
     if (section.type === "FAQ") {
       graphs.push(buildFAQPage(section.props.items));
     }
     if (section.type === "Testimonials") {
-      graphs.push(...buildReviewGraphs(section.props.items));
+      graphs.push(
+        ...buildReviewGraphs(site, page.seo.canonicalPath, section.props.items),
+      );
     }
   }
 
@@ -44,7 +58,7 @@ export function buildSchema(page: PageContent, site: SiteConfig): JsonLdGraph[] 
 
   if (page.schema.includes("Service") && page.pageType === "service") {
     graphs.push(
-      buildService(site.business, {
+      buildService(site, {
         name: page.seo.title,
         description: page.seo.description,
         path: page.seo.canonicalPath,

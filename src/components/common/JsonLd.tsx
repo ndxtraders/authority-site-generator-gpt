@@ -1,4 +1,5 @@
 import type { JsonLdGraph } from "@/lib/schema";
+import { serializeJsonLd } from "@/lib/schema/serialize";
 
 interface JsonLdProps {
   graphs: JsonLdGraph[];
@@ -20,7 +21,7 @@ export default function JsonLd({ graphs }: JsonLdProps) {
   return (
     <script
       type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(payload) }}
+      dangerouslySetInnerHTML={{ __html: serializeJsonLd(payload) }}
     />
   );
 }

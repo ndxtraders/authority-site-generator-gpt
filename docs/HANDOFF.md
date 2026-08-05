@@ -2,8 +2,8 @@
 
 **Written:** 2026-08-04
 **Repo:** `ndxtraders/authority-site-generator-gpt`
-**State:** Phases 0–3 and H.1–H.4 complete. Start at H.5.
-**Published checkpoint:** local `main` and GitHub `origin/main` include H.4.
+**State:** Phases 0–3 and H.1–H.5 complete. Start at H.6.
+**Published checkpoint:** local `main` and GitHub `origin/main` include H.5.
 
 > **Prime Directive:** Work only in the GPT local folder and GitHub repository. The local
 > and GitHub `authority-site-generator` upstreams are protected unless Rev proactively
@@ -15,7 +15,7 @@
 
 1. `docs/FRAMEWORK_PRD.md` — what we're building. **Source of truth.** If anything
    contradicts it, the PRD wins.
-2. `docs/IMPLEMENTATION_PLAN.md` — your task list. Phase H (v0.5.1) is active; H.5 is
+2. `docs/IMPLEMENTATION_PLAN.md` — your task list. Phase H (v0.5.1) is active; H.6 is
    next, and H.1–H.7 must finish before Phase 4.
 3. `docs/SESSION.md` — current status snapshot and the "known stubs" list (do not ship
    items). Kept up to date at the end of every phase; trust it over memory.
@@ -36,21 +36,21 @@ and PRD win — this file is a summary, not the source of truth.
 > `authority-site-generator` repositories. Read `AGENTS.md`, `README.md`,
 > `docs/FRAMEWORK_PRD.md`, `docs/IMPLEMENTATION_PLAN.md`, `docs/SESSION.md`, and
 > `docs/HANDOFF.md`, then verify `pwd`, `git remote -v`, branch, and status. Start and
-> complete H.5 only: JSON-LD safety, connected entities, truthful indexation, sitemap,
-> and manifest corrections. Preserve H.4's `contentState`/`content/production.json`
-> boundary and never invent or mark business claims verified. Run all H.5 acceptance
-> checks, update the session/handoff documents, commit and push the checkpoint, then
-> stop before H.6.
+> complete H.6 only: automated unit and negative fixture tests, production-build
+> integration assertions, browser coverage, and GitHub CI. Preserve H.5's safe JSON-LD,
+> connected entity IDs, verified-rating gate, explicit indexation field, truthful
+> sitemap, and valid manifest asset. Run all H.6 acceptance checks, update the
+> session/handoff documents, commit and push the checkpoint, then stop before H.7.
 
 ---
 
-## Start here — H.5, not Phase 4
+## Start here — H.6, not Phase 4
 
 The production-readiness review found that the architecture is sound but required a
 stricter executable contract, conversion boundary, lead controls, truth gate, connected
-structured data, and CI. H.1–H.4 have closed the content-contract,
-server-only-conversion-boundary, lead-submission, and production-truth findings.
-Structured-data safety and automated enforcement remain.
+structured data, and CI. H.1–H.5 have closed the content-contract,
+server-only-conversion-boundary, lead-submission, production-truth, and structured-data
+findings. Automated enforcement remains.
 
 Phase H addresses those risks before the framework multiplies routes and niches:
 
@@ -58,13 +58,13 @@ Phase H addresses those risks before the framework multiplies routes and niches:
 2. **H.2** — server-only conversion configuration — **complete**
 3. **H.3** — lead validation, timeout, and abuse controls — **complete**
 4. **H.4** — sample/verified content states and production truth gate — **complete**
-5. **H.5** — JSON-LD safety, connected entities, and indexation — **next**
-6. **H.6** — automated tests, browser checks, and GitHub CI
+5. **H.5** — JSON-LD safety, connected entities, and indexation — **complete**
+6. **H.6** — automated tests, browser checks, and GitHub CI — **next**
 7. **H.7** — documentation reconciliation and v0.5.1 release
 
-Treat each task as one Codex session. H.4 is the completed checkpoint; begin H.5 in a
+Treat each task as one Codex session. H.5 is the completed checkpoint; begin H.6 in a
 fresh session. When its acceptance checks pass, commit, update `docs/SESSION.md`, and
-stop before H.6. Do not switch sessions in the middle of a failing build or partial
+stop before H.7. Do not switch sessions in the middle of a failing build or partial
 migration.
 
 ### H.1 checkpoint
@@ -148,11 +148,34 @@ migration.
   detected trust claims; production-ledger claim IDs and fixture evidence sentinels were
   absent from built output.
 
+### H.5 checkpoint
+
+- Every authored or generated page now carries explicit `seo.indexable`; `/thank-you`
+  emits `noindex, follow` and is excluded from the sitemap through that shared field.
+- Sitemap entries omit modification dates until truthful content dates exist. The
+  manifest now references the existing `/favicon.ico`, not missing `/icon.png`.
+- JSON-LD serialization escapes HTML-significant characters so authored `</script>`
+  content cannot terminate the script element.
+- LocalBusiness and WebSite have stable IDs. WebSite publisher, Service provider, Review
+  itemReviewed, and AggregateRating itemReviewed all reference the same business ID;
+  service, review, and rating nodes have stable page-scoped IDs.
+- Review and AggregateRating nodes emit only when content state is `verified` and ratings
+  pass the strict 1–5 content schema. The private production ledger remains outside the
+  application loader and browser payloads.
+- Representative home, service, FAQ, location, and rated-testimonial fixtures cover the
+  connected graph. Sample-rating and JSON-LD script-termination cases are negative tests.
+- The official schema.org validator identified `serviceType` as unsupported on
+  LocalBusiness. It was removed there and retained on Service; the corrected connected
+  graph passed with 0 errors and 0 warnings across 6 detected items.
+- H.5 checks passed: validation (5 pages, 9 expected warnings), lint, TypeScript, 76
+  tests, and a 16-route production build. Production verification still failed on the
+  documented real-world blockers, as required.
+
 ---
 
 ## What already exists
 
-Phases 0–3 and H.1–H.4 are done. You are extending a working framework, not starting one.
+Phases 0–3 and H.1–H.5 are done. You are extending a working framework, not starting one.
 
 | Thing | Where | Notes |
 |---|---|---|
@@ -162,8 +185,8 @@ Phases 0–3 and H.1–H.4 are done. You are extending a working framework, not 
 | Section dispatch | `src/lib/sections.tsx` | Exhaustive switch — **do not convert to a lookup table**, read the file's own comment first. Also the injection point for display-safe site-wide data into sections that need more than their JSON content |
 | Content loader | `src/lib/content.ts` | The only module that knows where content lives. Parses static imports through the shared contract. **Still a static `PAGES` map — see "The one architectural thing" below** |
 | Validator | `scripts/validate-content.mts` | Uses the shared bundle parser and gates `next build` via `prebuild`; errors fail, development warnings print only |
-| Metadata | `src/lib/metadata.ts` | `buildPageMetadata(page)` — every page has a unique title/description/canonical |
-| Schema engine | `src/lib/schema/` | `buildSchema(page, site)` — LocalBusiness + BreadcrumbList always; FAQPage/Review conditional on section presence; WebSite/Service on `page.schema` opt-in |
+| Metadata | `src/lib/metadata.ts` | `buildPageMetadata(page)` — unique title/description/canonical plus explicit indexation |
+| Schema engine | `src/lib/schema/` | Safe serialization and a connected `@id` graph; ratings require verified content and valid 1–5 values |
 | Public conversion config | `src/types/site.ts` → `ConversionConfig`, `content/site.json` → `conversion` block | Display-safe `trackingPhone`, `displayPhone`, `thankYouPath`, and `model` only |
 | Server conversion config | `src/lib/server/conversion-config.ts` | Reads non-public `LEAD_DELIVERY_ENDPOINT` and optional `LEAD_DELIVERY_AUTHORIZATION`; never import into a Client Component |
 | Lead submission contract | `src/lib/contact-submission.ts` | Validates/normalizes input, enforces spam and size controls, applies provider timeout/acknowledgment/idempotency rules, and emits metadata-only outcomes |
@@ -331,8 +354,9 @@ not per-niche forks), which is Rev's call, not yours.
    factual claims about a real business; ask Rev. Should become hard errors before
    launch.
 5. **`TestimonialItem.rating` is unset on every testimonial**, so `Review`/
-   `AggregateRating` schema is never emitted (PRD §6 wants it). Needs real ratings from
-   the business, not a placeholder value.
+   `AggregateRating` schema is never emitted (PRD §6 wants it). The nodes are safely
+   connected and verified-state gated; they still need real ratings from the business,
+   not placeholder values.
 6. **Runtime content validation was completed in H.1.** Keep
    `src/lib/content-schema.ts` as the single parser/type source and do not reintroduce
    loader casts.
@@ -348,11 +372,12 @@ not per-niche forks), which is Rev's call, not yours.
    includes licence/insurance language, numerical statistics, response-time claims, and
    testimonials. H.4 inventories every detected path and blocks production; the 19 claim
    groups must still be sourced or removed by accountable humans.
-10. **Schema and indexation need correction.** JSON-LD needs safe serialization and
-    connected `@id` references; `/thank-you` must be noindex and leave the sitemap. H.5.
-11. **Focused content-contract and lead-submission tests exist, but CI and the full
-    framework regression suite do not.** H.6 completes coverage before routing and niche
-    expansion.
+10. **Schema and indexation safety was completed in H.5.** Preserve safe serialization,
+    connected stable IDs, verified-only ratings, explicit indexation, truthful sitemap
+    dates, and valid manifest assets.
+11. **Focused content-contract, lead-submission, production-readiness, and schema-safety
+    tests exist, but CI and the full framework regression suite do not.** H.6 completes
+    coverage before routing and niche expansion.
 
 ---
 

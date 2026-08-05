@@ -1,0 +1,183 @@
+{
+  "site": {
+    "url": "https://authority-contractors.test",
+    "contentState": "verified",
+    "business": {
+      "name": "Authority Contractors",
+      "industry": "Home Services",
+      "primaryService": "Property Repair",
+      "city": "Test City",
+      "state": "CA",
+      "region": "Test County, CA",
+      "phone": "(209) 472-0123",
+      "email": "hello@authority-contractors.test",
+      "licenseNumber": "LIC-12345",
+      "priceRange": "$$",
+      "address": {
+        "street": "100 Market Street",
+        "city": "Test City",
+        "state": "CA",
+        "postalCode": "95350",
+        "country": "US"
+      },
+      "geo": {
+        "latitude": "37.6391",
+        "longitude": "-120.9969"
+      },
+      "hours": ["Mo-Fr 08:00-17:00"],
+      "sameAs": ["https://social.example.org/authority-contractors"]
+    },
+    "branding": {
+      "primaryColor": "blue",
+      "accentColor": "slate"
+    },
+    "navigation": {
+      "links": [{ "label": "Home", "href": "/" }],
+      "cta": "Contact"
+    },
+    "footer": {
+      "headline": "Property repair services.",
+      "copyright": "© 2026 Authority Contractors"
+    },
+    "schema": {
+      "businessType": "HomeAndConstructionBusiness"
+    },
+    "conversion": {
+      "trackingPhone": "+12094720123",
+      "displayPhone": "(209) 472-0123",
+      "thankYouPath": "/contact",
+      "model": "considered"
+    }
+  },
+  "pages": {
+    "home": {
+      "slug": "home",
+      "pageType": "home",
+      "seo": {
+        "title": "Authority Contractors",
+        "description": "Verified property repair information.",
+        "canonicalPath": "/",
+        "indexable": true
+      },
+      "schema": ["WebSite"],
+      "sections": [
+        {
+          "type": "Answer",
+          "props": {
+            "question": "What does this business provide?",
+            "answer": "It provides verified property repair services."
+          }
+        }
+      ],
+      "internalLinks": []
+    },
+    "service": {
+      "slug": "property-repair",
+      "pageType": "service",
+      "seo": {
+        "title": "Property Repair",
+        "description": "Verified property repair service details.",
+        "canonicalPath": "/services/property-repair",
+        "indexable": true
+      },
+      "schema": ["Service"],
+      "sections": [
+        {
+          "type": "Answer",
+          "props": {
+            "question": "What is included?",
+            "answer": "The service details are documented here."
+          }
+        }
+      ],
+      "internalLinks": []
+    },
+    "faq": {
+      "slug": "service-timing",
+      "pageType": "faq",
+      "seo": {
+        "title": "Service Timing",
+        "description": "Verified answers about service timing.",
+        "canonicalPath": "/faq/service-timing",
+        "indexable": true
+      },
+      "schema": ["FAQPage"],
+      "sections": [
+        {
+          "type": "FAQ",
+          "props": {
+            "eyebrow": "FAQ",
+            "title": "Service timing questions",
+            "description": "Verified timing information.",
+            "items": [
+              {
+                "question": "When is service available?",
+                "answer": "Availability is confirmed during scheduling."
+              }
+            ]
+          }
+        }
+      ],
+      "internalLinks": []
+    },
+    "location": {
+      "slug": "verified-area",
+      "pageType": "location",
+      "seo": {
+        "title": "Verified Area Service",
+        "description": "Verified service information for this area.",
+        "canonicalPath": "/service-area/verified-area",
+        "indexable": true
+      },
+      "schema": [],
+      "sections": [
+        {
+          "type": "Answer",
+          "props": {
+            "question": "Is this area served?",
+            "answer": "This fixture represents a verified service area."
+          }
+        }
+      ],
+      "internalLinks": []
+    },
+    "ratedTestimonials": {
+      "slug": "about",
+      "pageType": "about",
+      "seo": {
+        "title": "Verified Customer Feedback",
+        "description": "Feedback published from verified source content.",
+        "canonicalPath": "/about",
+        "indexable": true
+      },
+      "schema": [],
+      "sections": [
+        {
+          "type": "Testimonials",
+          "props": {
+            "eyebrow": "Feedback",
+            "title": "Verified customer feedback",
+            "description": "Published from documented source material.",
+            "items": [
+              {
+                "quote": "The team communicated clearly throughout the project.",
+                "author": "Jordan A.",
+                "role": "Customer",
+                "rating": 5
+              }
+            ]
+          }
+        }
+      ],
+      "internalLinks": []
+    }
+  },
+  "expected": {
+    "businessId": "https://authority-contractors.test/#business",
+    "websiteId": "https://authority-contractors.test/#website",
+    "serviceId": "https://authority-contractors.test/services/property-repair#service",
+    "aggregateRatingId": "https://authority-contractors.test/about#aggregate-rating",
+    "reviewId": "https://authority-contractors.test/about#review-1",
+    "locationAreaServed": "Verified Area"
+  }
+}

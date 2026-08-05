@@ -1,5 +1,6 @@
-import { absoluteUrl } from "@/lib/url";
 import type { PageContent } from "@/types/page";
+import type { SiteConfig } from "@/types/site";
+import { schemaAbsoluteUrl } from "./entity.ts";
 import type { JsonLdGraph } from "./types";
 
 /**
@@ -21,13 +22,16 @@ function labelFromSlug(slug: string): string {
  * that's a single-item trail back to itself, which is the conventional
  * degenerate case rather than an omission.
  */
-export function buildBreadcrumbList(page: PageContent): JsonLdGraph {
+export function buildBreadcrumbList(page: PageContent, site: SiteConfig): JsonLdGraph {
   const items =
     page.pageType === "home"
-      ? [{ name: labelFromSlug(page.slug), url: absoluteUrl(page.seo.canonicalPath) }]
+      ? [{ name: labelFromSlug(page.slug), url: schemaAbsoluteUrl(site, page.seo.canonicalPath) }]
       : [
-          { name: "Home", url: absoluteUrl("/") },
-          { name: labelFromSlug(page.slug), url: absoluteUrl(page.seo.canonicalPath) },
+          { name: "Home", url: schemaAbsoluteUrl(site, "/") },
+          {
+            name: labelFromSlug(page.slug),
+            url: schemaAbsoluteUrl(site, page.seo.canonicalPath),
+          },
         ];
 
   return {

@@ -1,7 +1,7 @@
 # Current Session
 
-**Version:** v0.5 complete; v0.5.1 H.1–H.4 complete
-**Phase:** H.5 — indexation and structured-data safety is next
+**Version:** v0.5 complete; v0.5.1 H.1–H.5 complete
+**Phase:** H.6 — automated tests, browser checks, and CI is next
 **First market:** Modesto, CA (roofing)
 **Authorized repo:** `ndxtraders/authority-site-generator-gpt`
 
@@ -15,8 +15,9 @@ clean build, then identified hardening work that must precede page and niche exp
 The PRD is now v1.1 with decisions D7–D11. `docs/IMPLEMENTATION_PLAN.md` contains Phase H,
 seven sequenced v0.5.1 tasks. H.1 provides the shared executable content contract, H.2
 isolates lead-delivery configuration on the server, H.3 validates and protects lead
-submission, and H.4 separates sample content from verified production evidence; H.5–H.7
-remain. Each H task is a natural Codex session boundary.
+submission, H.4 separates sample content from verified production evidence, and H.5
+completes structured-data and indexation safety; H.6–H.7 remain. Each H task is a natural
+Codex session boundary.
 
 ## Completed in the planning session
 
@@ -143,10 +144,45 @@ H.4 verification results:
   Google fonts)
 - Production-ledger claim IDs and fixture evidence sentinels — absent from built output
 
+## Completed in H.5
+
+- Added required `seo.indexable` page content so indexation is explicit and reusable;
+  authored and generated public pages are indexable while `/thank-you` is `noindex`
+- Made page metadata emit `noindex, follow` for non-indexable routes and made the sitemap
+  exclude them from the same executable content field
+- Removed deployment-time sitemap modification dates rather than presenting builds as
+  content updates; replaced the missing manifest `/icon.png` with the existing favicon
+- Safely serialized JSON-LD by escaping HTML-significant characters and script-closing
+  content before insertion into the `application/ld+json` element
+- Added stable business, website, service, aggregate-rating, and review `@id` values;
+  connected WebSite publisher, Service provider, Review itemReviewed, and AggregateRating
+  itemReviewed to the same LocalBusiness entity
+- Gated Review/AggregateRating output on verified content and retained strict 1–5 rating
+  validation; current sample testimonials continue to emit no rating claims
+- Added representative home, service, FAQ, location, and rated-testimonial fixtures plus
+  safety tests for connected graphs, unsupported sample ratings, and script termination
+- Removed `serviceType` from LocalBusiness after the official schema.org validator
+  identified it as unsupported there; retained it on Service, where it is valid
+
+H.5 verification results:
+
+- `npm run validate` — passed, 5 pages checked; 9 expected development warnings
+- `npm run verify:production` — failed as required with the documented blockers on the
+  current sample content and no un-inventoried trust claims
+- `npm run lint` — passed
+- `npx tsc --noEmit` — passed
+- `npm test` — passed, 76/76
+- `npm run build` — passed, 16 routes generated (required network access for configured
+  Google fonts)
+- Built output — `/thank-you` emitted `noindex, follow` and was absent from the sitemap;
+  sitemap contained no false modification dates; manifest referenced existing favicon
+- Official schema.org validator — 0 errors and 0 warnings across 6 connected items:
+  BreadcrumbList, WebSite, Service, Review, AggregateRating, and FAQPage
+
 ## Next — exact starting point
 
-Start a fresh Codex task for **H.5 — Correct indexation and structured-data safety** in
-`docs/IMPLEMENTATION_PLAN.md`. Do not start H.6 or Phase 4.
+Start a fresh Codex task for **H.6 — Add automated tests and CI** in
+`docs/IMPLEMENTATION_PLAN.md`. Do not start H.7 or Phase 4.
 
 Preserve H.4's split: `contentState` is public-safe site content,
 `content/production.json` is verification evidence, and the latter must not enter the
@@ -163,9 +199,9 @@ recorded source and accountable human reviewer required by `docs/DEPLOYMENT.md`.
 - Business identity, local knowledge, testimonials, legal, GBP, rate-control, and
   image-rights human reviews remain pending
 - Generated legal templates have not been reviewed by counsel
-- Review/AggregateRating schema has no verified ratings and is not entity-connected
-- The thank-you page is currently indexable and in the sitemap
-- Starter assets remain; the manifest references an icon that does not exist
+- Review/AggregateRating schema is connected and safely gated, but current content has no
+  verified ratings to emit
+- Starter assets remain and real, rights-cleared production images are still required
 - Mobile navigation has not had a real browser keyboard pass
 - No CI or full framework regression suite protects the acceptance criteria yet
 
@@ -181,5 +217,7 @@ Only `authority-site-generator-gpt` is authorized for edits and pushes. The loca
 GitHub `authority-site-generator` upstreams are protected and must not be modified unless
 Rev proactively initiates that exact request.
 
-Intentional local-only state: `Archive/h4-pre-change-2026-08-04/` contains the required
-pre-edit safety copies for H.4. It is untracked and excluded from the product checkpoint.
+Intentional local-only state: `Archive/h4-pre-change-2026-08-04/` and
+`Archive/h5-pre-change-2026-08-04/` contain required pre-edit safety copies. The
+pre-existing `Archive/handoff-main-publish-2026-08-04/` also remains untracked. All three
+are excluded from the product checkpoint.

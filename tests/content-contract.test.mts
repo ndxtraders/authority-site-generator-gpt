@@ -85,6 +85,7 @@ function basePage(): Record<string, unknown> {
       title: "Authority Test",
       description: "A valid content-contract test page.",
       canonicalPath: "/",
+      indexable: true,
     },
     schema: ["WebSite"],
     internalLinks: [],
@@ -188,6 +189,37 @@ test("unknown schema name fails validation", () => {
   const page = basePage();
   page.schema = [fixtureString("invalid-schema-name.json")];
   expectFailure("schema.0", baseSite(), [pageRecord(page)]);
+});
+
+test("every page must declare its indexation state", () => {
+  const page = basePage();
+  const seo = page.seo;
+  assert.ok(isRecord(seo));
+  delete seo.indexable;
+  expectFailure("seo.indexable", baseSite(), [pageRecord(page)]);
+});
+
+test("testimonial ratings outside the supported 1–5 range fail validation", () => {
+  const page = basePage();
+  page.sections = [
+    {
+      type: "Testimonials",
+      props: {
+        eyebrow: "Feedback",
+        title: "Customer feedback",
+        description: "Documented feedback.",
+        items: [
+          {
+            quote: "Clear communication.",
+            author: "Test Customer",
+            role: "Customer",
+            rating: 6,
+          },
+        ],
+      },
+    },
+  ];
+  expectFailure("rating", baseSite(), [pageRecord(page)]);
 });
 
 test("slug and page type must agree with the source route", () => {
