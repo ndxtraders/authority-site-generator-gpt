@@ -264,6 +264,85 @@ export const SchemaGraphSchema = z.enum([
   "Review",
 ]);
 
+export const ContentStateSchema = z.enum(["sample", "verified"]);
+
+const verificationStatusSchema = z.enum(["pending", "verified"]);
+
+const verificationDateSchema = z.string().refine(
+  (value) => {
+    if (value === "" || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return value === "";
+    const date = new Date(`${value}T00:00:00.000Z`);
+    return !Number.isNaN(date.valueOf()) && date.toISOString().slice(0, 10) === value;
+  },
+  { message: "must be empty or an ISO date in YYYY-MM-DD format" },
+);
+
+const productionReviewSchema = z
+  .object({
+    status: verificationStatusSchema,
+    source: z.string(),
+    reviewer: z.string(),
+    reviewedAt: verificationDateSchema,
+  })
+  .strict();
+
+const claimLocationSchema = z
+  .object({
+    source: z.string().regex(
+      /^content\/(?:site\.json|(?:pages|services|locations|faq)\/[a-z0-9-]+\.json)$/,
+      { message: "must identify a supported content JSON file" },
+    ),
+    path: nonEmptyString,
+  })
+  .strict();
+
+const trustClaimSchema = z
+  .object({
+    id: z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, {
+      message: "must be a lowercase kebab-case identifier",
+    }),
+    category: z.enum([
+      "licence-insurance",
+      "experience-statistic",
+      "availability-response",
+      "warranty-guarantee",
+      "testimonial-rating",
+      "service-capability",
+      "local-expertise",
+    ]),
+    summary: nonEmptyString,
+    status: verificationStatusSchema,
+    source: z.string(),
+    reviewer: z.string(),
+    reviewedAt: verificationDateSchema,
+    locations: z.array(claimLocationSchema).min(1),
+  })
+  .strict();
+
+/**
+ * Production evidence is intentionally separate from SiteConfig. Reviewer names
+ * and internal source references must never become public site data.
+ */
+export const ProductionVerificationSchema = z
+  .object({
+    claims: z.array(trustClaimSchema).refine(
+      (claims) => new Set(claims.map((claim) => claim.id)).size === claims.length,
+      { message: "must not contain duplicate claim identifiers" },
+    ),
+    humanReviews: z
+      .object({
+        businessIdentity: productionReviewSchema,
+        localKnowledge: productionReviewSchema,
+        testimonials: productionReviewSchema,
+        legalLanguage: productionReviewSchema,
+        gbpAlignment: productionReviewSchema,
+        rateControl: productionReviewSchema,
+        imageRights: productionReviewSchema,
+      })
+      .strict(),
+  })
+  .strict();
+
 export const PageContentSchema = z
   .object({
     slug: z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, {
@@ -289,6 +368,7 @@ export const PageContentSchema = z
 export const SiteConfigSchema = z
   .object({
     url: siteOrigin,
+    contentState: ContentStateSchema,
     business: z
       .object({
         name: nonEmptyString,
@@ -389,6 +469,7 @@ export type Section = z.infer<typeof SectionSchema>;
 export type SectionType = z.infer<typeof SectionTypeSchema>;
 export type PageType = z.infer<typeof PageTypeSchema>;
 export type SchemaGraph = z.infer<typeof SchemaGraphSchema>;
+export type ContentState = z.infer<typeof ContentStateSchema>;
 export type PageContent = z.infer<typeof PageContentSchema>;
 export type PageSeo = PageContent["seo"];
 export type SiteConfig = z.infer<typeof SiteConfigSchema>;
@@ -401,6 +482,9 @@ export type NavigationLink = Navigation["links"][number];
 export type FooterConfig = SiteConfig["footer"];
 export type SchemaConfig = SiteConfig["schema"];
 export type ConversionConfig = SiteConfig["conversion"];
+export type ProductionVerification = z.infer<typeof ProductionVerificationSchema>;
+export type ProductionReview = ProductionVerification["humanReviews"][keyof ProductionVerification["humanReviews"]];
+export type TrustClaim = ProductionVerification["claims"][number];
 
 export type SectionPropsMap = {
   [Type in keyof typeof SECTION_PROP_SCHEMAS]: z.infer<

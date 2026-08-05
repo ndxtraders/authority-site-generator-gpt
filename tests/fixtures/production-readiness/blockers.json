@@ -1,0 +1,134 @@
+[
+  {
+    "name": "sample lifecycle state",
+    "path": "site.contentState",
+    "value": "sample",
+    "expectedCode": "content-state"
+  },
+  {
+    "name": "reserved business phone",
+    "path": "site.business.phone",
+    "value": "(209) 555-0148",
+    "expectedCode": "reserved-phone"
+  },
+  {
+    "name": "reserved tracking phone",
+    "path": "site.conversion.trackingPhone",
+    "value": "+12095550148",
+    "expectedCode": "reserved-phone"
+  },
+  {
+    "name": "missing licence number",
+    "path": "site.business.licenseNumber",
+    "value": "",
+    "expectedCode": "incomplete-identity"
+  },
+  {
+    "name": "missing street address",
+    "path": "site.business.address.street",
+    "value": "",
+    "expectedCode": "incomplete-identity"
+  },
+  {
+    "name": "missing postal code",
+    "path": "site.business.address.postalCode",
+    "value": "",
+    "expectedCode": "incomplete-identity"
+  },
+  {
+    "name": "missing latitude",
+    "path": "site.business.geo.latitude",
+    "value": "",
+    "expectedCode": "incomplete-identity"
+  },
+  {
+    "name": "missing longitude",
+    "path": "site.business.geo.longitude",
+    "value": "",
+    "expectedCode": "incomplete-identity"
+  },
+  {
+    "name": "missing hours",
+    "path": "site.business.hours",
+    "value": [],
+    "expectedCode": "incomplete-identity"
+  },
+  {
+    "name": "missing sameAs profile",
+    "path": "site.business.sameAs",
+    "value": [],
+    "expectedCode": "incomplete-identity"
+  },
+  {
+    "name": "unconfigured lead delivery",
+    "path": "leadDeliveryEndpoint",
+    "value": null,
+    "expectedCode": "lead-delivery"
+  },
+  {
+    "name": "missing real images",
+    "path": "publicFiles",
+    "value": ["next.svg"],
+    "expectedCode": "real-images"
+  },
+  {
+    "name": "business identity review pending",
+    "path": "verification.humanReviews.businessIdentity.status",
+    "value": "pending",
+    "expectedCode": "human-review"
+  },
+  {
+    "name": "local knowledge review pending",
+    "path": "verification.humanReviews.localKnowledge.status",
+    "value": "pending",
+    "expectedCode": "human-review"
+  },
+  {
+    "name": "testimonial review pending",
+    "path": "verification.humanReviews.testimonials.status",
+    "value": "pending",
+    "expectedCode": "human-review"
+  },
+  {
+    "name": "legal review pending",
+    "path": "verification.humanReviews.legalLanguage.status",
+    "value": "pending",
+    "expectedCode": "human-review"
+  },
+  {
+    "name": "GBP alignment review pending",
+    "path": "verification.humanReviews.gbpAlignment.status",
+    "value": "pending",
+    "expectedCode": "human-review"
+  },
+  {
+    "name": "rate control review pending",
+    "path": "verification.humanReviews.rateControl.status",
+    "value": "pending",
+    "expectedCode": "human-review"
+  },
+  {
+    "name": "image rights review pending",
+    "path": "verification.humanReviews.imageRights.status",
+    "value": "pending",
+    "expectedCode": "human-review"
+  },
+  {
+    "name": "claim evidence pending",
+    "path": "verification.claims.0.status",
+    "value": "pending",
+    "expectedCode": "unverified-claim"
+  },
+  {
+    "name": "claim evidence uses a placeholder source",
+    "path": "verification.claims.0.source",
+    "value": "TODO",
+    "expectedCode": "unverified-claim"
+  },
+  {
+    "name": "unsupported trust claim",
+    "path": "pages.0.page.sections.0.props.subheadline",
+    "value": "Licensed and insured service for every project.",
+    "expectedCode": "unsupported-claim"
+  }
+]

@@ -1,0 +1,297 @@
+{
+  "claims": [
+    {
+      "id": "responsive-scheduling",
+      "category": "availability-response",
+      "summary": "The business schedules quickly and communicates responsively.",
+      "status": "pending",
+      "source": "",
+      "reviewer": "",
+      "reviewedAt": "",
+      "locations": [
+        { "source": "content/pages/home.json", "path": "sections.2.props.items.0" },
+        { "source": "content/pages/about.json", "path": "sections.1.props.items.0" }
+      ]
+    },
+    {
+      "id": "licensed-and-insured",
+      "category": "licence-insurance",
+      "summary": "The business is properly licensed and insured.",
+      "status": "pending",
+      "source": "",
+      "reviewer": "",
+      "reviewedAt": "",
+      "locations": [
+        { "source": "content/pages/home.json", "path": "sections.2.props.items.1" },
+        { "source": "content/pages/about.json", "path": "sections.1.props.items.1" }
+      ]
+    },
+    {
+      "id": "local-experience-and-knowledge",
+      "category": "local-expertise",
+      "summary": "The business has local experience and understands regional conditions.",
+      "status": "pending",
+      "source": "",
+      "reviewer": "",
+      "reviewedAt": "",
+      "locations": [
+        { "source": "content/pages/home.json", "path": "sections.2.props.title" },
+        { "source": "content/pages/home.json", "path": "sections.2.props.items.3" },
+        { "source": "content/pages/about.json", "path": "sections.1.props.title" },
+        { "source": "content/pages/about.json", "path": "sections.1.props.items.3" }
+      ]
+    },
+    {
+      "id": "transparent-quotes",
+      "category": "service-capability",
+      "summary": "The business provides clear recommendations and honest pricing without pressure.",
+      "status": "pending",
+      "source": "",
+      "reviewer": "",
+      "reviewedAt": "",
+      "locations": [
+        { "source": "content/pages/home.json", "path": "sections.2.props.items.2" },
+        { "source": "content/pages/about.json", "path": "sections.1.props.items.2" }
+      ]
+    },
+    {
+      "id": "trusted-local-professionals",
+      "category": "local-expertise",
+      "summary": "The business is presented as a trusted local professional team.",
+      "status": "pending",
+      "source": "",
+      "reviewer": "",
+      "reviewedAt": "",
+      "locations": [
+        { "source": "content/pages/home.json", "path": "sections.0.props.eyebrow" },
+        { "source": "content/pages/services.json", "path": "sections.0.props.eyebrow" },
+        { "source": "content/pages/about.json", "path": "sections.0.props.headline" }
+      ]
+    },
+    {
+      "id": "trusted-results-label",
+      "category": "experience-statistic",
+      "summary": "The proof section presents the business results as trusted.",
+      "status": "pending",
+      "source": "",
+      "reviewer": "",
+      "reviewedAt": "",
+      "locations": [
+        { "source": "content/pages/home.json", "path": "sections.3.props.eyebrow" },
+        { "source": "content/pages/about.json", "path": "sections.2.props.eyebrow" }
+      ]
+    },
+    {
+      "id": "years-serving-area",
+      "category": "experience-statistic",
+      "summary": "The business has more than 25 years of experience serving the area.",
+      "status": "pending",
+      "source": "",
+      "reviewer": "",
+      "reviewedAt": "",
+      "locations": [
+        { "source": "content/pages/home.json", "path": "sections.3.props.title" },
+        { "source": "content/pages/home.json", "path": "sections.3.props.stats.0" },
+        { "source": "content/pages/about.json", "path": "sections.2.props.title" },
+        { "source": "content/pages/about.json", "path": "sections.2.props.stats.0" }
+      ]
+    },
+    {
+      "id": "projects-completed",
+      "category": "experience-statistic",
+      "summary": "The business has completed more than 1,200 projects.",
+      "status": "pending",
+      "source": "",
+      "reviewer": "",
+      "reviewedAt": "",
+      "locations": [
+        { "source": "content/pages/home.json", "path": "sections.3.props.stats.1" },
+        { "source": "content/pages/about.json", "path": "sections.2.props.stats.1" }
+      ]
+    },
+    {
+      "id": "twenty-four-seven-response",
+      "category": "availability-response",
+      "summary": "The business provides 24/7 emergency response.",
+      "status": "pending",
+      "source": "",
+      "reviewer": "",
+      "reviewedAt": "",
+      "locations": [
+        { "source": "content/pages/home.json", "path": "sections.3.props.stats.2" },
+        { "source": "content/pages/about.json", "path": "sections.2.props.stats.2" }
+      ]
+    },
+    {
+      "id": "contact-response-time",
+      "category": "availability-response",
+      "summary": "The business is available for urgent issues and responds soon.",
+      "status": "pending",
+      "source": "",
+      "reviewer": "",
+      "reviewedAt": "",
+      "locations": [
+        { "source": "content/pages/contact.json", "path": "sections.1.props.title" },
+        { "source": "content/pages/contact.json", "path": "sections.1.props.description" }
+      ]
+    },
+    {
+      "id": "repair-response-time",
+      "category": "availability-response",
+      "summary": "The business responds quickly to repair requests.",
+      "status": "pending",
+      "source": "",
+      "reviewer": "",
+      "reviewedAt": "",
+      "locations": [
+        { "source": "content/pages/home.json", "path": "sections.1.props.items.0" },
+        { "source": "content/pages/services.json", "path": "sections.1.props.items.0" }
+      ]
+    },
+    {
+      "id": "warranty-backed-installations",
+      "category": "warranty-guarantee",
+      "summary": "Replacement installations are backed by a warranty.",
+      "status": "pending",
+      "source": "",
+      "reviewer": "",
+      "reviewedAt": "",
+      "locations": [
+        { "source": "content/pages/home.json", "path": "sections.1.props.items.1" },
+        { "source": "content/pages/services.json", "path": "sections.1.props.items.1" }
+      ]
+    },
+    {
+      "id": "insurance-claim-support",
+      "category": "service-capability",
+      "summary": "The business supports customers with insurance claims.",
+      "status": "pending",
+      "source": "",
+      "reviewer": "",
+      "reviewedAt": "",
+      "locations": [
+        { "source": "content/pages/home.json", "path": "sections.1.props.items.2" },
+        { "source": "content/pages/home.json", "path": "sections.6.props.items.2.question" },
+        { "source": "content/pages/services.json", "path": "sections.1.props.items.2" }
+      ]
+    },
+    {
+      "id": "testimonial-megan-l",
+      "category": "testimonial-rating",
+      "summary": "Testimonial attributed to Megan L.",
+      "status": "pending",
+      "source": "",
+      "reviewer": "",
+      "reviewedAt": "",
+      "locations": [
+        { "source": "content/pages/home.json", "path": "sections.5.props.items.0" }
+      ]
+    },
+    {
+      "id": "testimonial-carlos-r",
+      "category": "testimonial-rating",
+      "summary": "Testimonial attributed to Carlos R.",
+      "status": "pending",
+      "source": "",
+      "reviewer": "",
+      "reviewedAt": "",
+      "locations": [
+        { "source": "content/pages/home.json", "path": "sections.5.props.items.1" }
+      ]
+    },
+    {
+      "id": "testimonial-diane-t",
+      "category": "testimonial-rating",
+      "summary": "Testimonial attributed to Diane T.",
+      "status": "pending",
+      "source": "",
+      "reviewer": "",
+      "reviewedAt": "",
+      "locations": [
+        { "source": "content/pages/home.json", "path": "sections.5.props.items.2" }
+      ]
+    },
+    {
+      "id": "emergency-repair-response",
+      "category": "availability-response",
+      "summary": "The business responds quickly to emergency leak and storm damage requests.",
+      "status": "pending",
+      "source": "",
+      "reviewer": "",
+      "reviewedAt": "",
+      "locations": [
+        { "source": "content/pages/home.json", "path": "sections.6.props.items.0.answer" }
+      ]
+    },
+    {
+      "id": "testimonial-trust-heading",
+      "category": "testimonial-rating",
+      "summary": "The testimonial section states that homeowners trust the business.",
+      "status": "pending",
+      "source": "",
+      "reviewer": "",
+      "reviewedAt": "",
+      "locations": [
+        { "source": "content/pages/home.json", "path": "sections.5.props.title" }
+      ]
+    },
+    {
+      "id": "thank-you-response-time",
+      "category": "availability-response",
+      "summary": "The business follows up shortly, picks up urgent calls, and responds right away.",
+      "status": "pending",
+      "source": "",
+      "reviewer": "",
+      "reviewedAt": "",
+      "locations": [
+        { "source": "content/pages/thank-you.json", "path": "seo.description" },
+        { "source": "content/pages/thank-you.json", "path": "sections.0.props.answer" },
+        { "source": "content/pages/thank-you.json", "path": "sections.1.props.description" }
+      ]
+    }
+  ],
+  "humanReviews": {
+    "businessIdentity": {
+      "status": "pending",
+      "source": "",
+      "reviewer": "",
+      "reviewedAt": ""
+    },
+    "localKnowledge": {
+      "status": "pending",
+      "source": "",
+      "reviewer": "",
+      "reviewedAt": ""
+    },
+    "testimonials": {
+      "status": "pending",
+      "source": "",
+      "reviewer": "",
+      "reviewedAt": ""
+    },
+    "legalLanguage": {
+      "status": "pending",
+      "source": "",
+      "reviewer": "",
+      "reviewedAt": ""
+    },
+    "gbpAlignment": {
+      "status": "pending",
+      "source": "",
+      "reviewer": "",
+      "reviewedAt": ""
+    },
+    "rateControl": {
+      "status": "pending",
+      "source": "",
+      "reviewer": "",
+      "reviewedAt": ""
+    },
+    "imageRights": {
+      "status": "pending",
+      "source": "",
+      "reviewer": "",
+      "reviewedAt": ""
+    }
+  }
+}

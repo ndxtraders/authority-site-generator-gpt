@@ -1,9 +1,9 @@
 # Deployment
 
-> **Current status:** v0.5 is a working prototype, not a production-ready release. Do
-> not deploy the sample roofing content as a real business site. Complete Phase H
-> (v0.5.1), including the production-readiness gate and human verification of claims,
-> before launch.
+> **Current status:** v0.5.1 hardening is in progress. The production-readiness gate is
+> active and intentionally rejects the current sample roofing content. Do not deploy it
+> as a real business site. Complete the remaining Phase H work and every documented
+> real-world verification item before launch.
 
 ## Launching a new site
 
@@ -20,18 +20,53 @@ No changes under `src/` should be required.
 ## Deploy
 
 ```bash
-npm run validate      # content validator — must pass before build
-npx next build        # must succeed with zero errors
+npm run validate              # structural/development content gate
+npm run verify:production     # truth and launch-readiness gate
+npm run build                 # full production build
 git add .
 git commit -m "..."
 git push              # only to the authorized GPT repository
 ```
 
-Phase H.4 will add a separate production-readiness command. The structural validator
-answers whether the content is well formed; the production gate answers whether it is
-safe and sufficiently verified to publish. Both must pass before a production deploy.
+`npm run validate` permits clearly identified sample content so development can continue.
+`npm run verify:production` rejects sample status, reserved phone data, incomplete
+business identity, unconfigured lead delivery, missing real images, pending human review,
+unverified claims, stale evidence paths, and risky trust claims missing from the evidence
+ledger. Both commands and the full build must pass before a production deploy.
 
 Vercel auto-deploys on push.
+
+## Content truth and verification evidence
+
+`content/site.json` carries the public-safe lifecycle value `contentState`: `sample` or
+`verified`. Detailed evidence belongs in `content/production.json`, which is validated by
+the tooling but is not imported by the application content loader. Keep evidence entries
+free of credentials, personal data, and confidential documents; record a non-sensitive
+source reference that an accountable reviewer can resolve.
+
+The production ledger has two parts:
+
+- `claims` records each factual trust or service claim, its exact content paths, review
+  status, evidence source, reviewer, and review date. The gate automatically inventories
+  Services, WhyChooseUs, Proof, Testimonials, and Authority content, plus risky language
+  elsewhere. A new detected claim without a ledger entry fails verification.
+- `humanReviews` records the checks software cannot prove. Every item requires
+  `status: "verified"`, a source, reviewer, and `reviewedAt` date.
+
+| Review | Required source | Accountable reviewer |
+|---|---|---|
+| Business identity | Owner intake plus official registration/licence and NAP records | Business owner or designated verification reviewer |
+| Local knowledge | Identified local research, permit/code sources, and owner or field-expert confirmation | Local subject-matter reviewer |
+| Testimonials and ratings | Original platform URL/export or signed customer publication approval | Business owner or designated verification reviewer |
+| Legal language | Written approval tied to the deployed legal text | Qualified legal reviewer selected by the business |
+| GBP alignment | Current Google Business Profile export or dated screenshots | Deployment owner |
+| Rate control | Provider/edge rule ID, thresholds, activation date, and test evidence | Rev Vaughn, deployment owner |
+| Image rights | Original asset, licence, or model/property release register | Content owner or designated verification reviewer |
+
+To clear a claim, either remove it from the page and its ledger record, or verify it
+against a recorded source and complete its reviewer/date fields. Set `contentState` to
+`verified` only after the entire gate passes. Never change the state merely to bypass a
+deployment failure.
 
 ## Server-only lead delivery configuration
 
@@ -44,10 +79,12 @@ file, or prefix them with `NEXT_PUBLIC_`:
 | `LEAD_DELIVERY_ENDPOINT` | Before launch | Absolute HTTP(S) endpoint that receives the lead JSON payload; use HTTPS in production |
 | `LEAD_DELIVERY_AUTHORIZATION` | Provider-dependent | Complete `Authorization` header value required by the provider |
 
-Only `src/lib/server/conversion-config.ts` reads these variables. The contact Server
-Action receives no endpoint, credential, or redirect argument from the browser. It reads
-the validated `conversion.thankYouPath` from site content on the server and redirects
-only after the provider returns a successful response.
+`src/lib/server/conversion-config.ts` remains the application's only reader of these
+variables. The operational `verify:production` command also checks that the endpoint is
+present and is a real HTTPS provider URL; it never logs or serializes the value. The
+contact Server Action receives no endpoint, credential, or redirect argument from the
+browser. It reads the validated `conversion.thankYouPath` from site content on the server
+and redirects only after the provider returns a successful response.
 
 No delivery provider is configured in this repository. Until the deployment environment
 defines a real endpoint, the form returns a visitor-safe error and logs only a generated
@@ -94,6 +131,8 @@ that rate limiting is already active.
 - [ ] Submit `sitemap.xml` to Google Search Console
 - [ ] Confirm NAP matches the Google Business Profile exactly
 - [ ] Confirm every license, insurance, experience, availability, project-count, review, and testimonial claim has an accountable human source
+- [ ] Confirm `contentState` is `verified` and every `content/production.json` evidence record names its source, reviewer, and review date
+- [ ] Confirm local-knowledge, legal, GBP, and image-rights reviews are recorded
 - [ ] Test click-to-call on a real mobile device
 - [ ] Submit a test lead through the form and confirm it arrives
 - [ ] Confirm Rev Vaughn (deployment owner) recorded an active rate-control rule: ≤10 requests/minute, burst ≤5, and `Idempotency-Key` suppression for ≥24 hours
@@ -105,5 +144,5 @@ that rate limiting is already active.
 - Push only to `ndxtraders/authority-site-generator-gpt`. The original
   `ndxtraders/authority-site-generator` repository is protected by the Prime Directive.
 - The content validator gates the build. Do not bypass it.
-- The production-readiness gate will gate deployment once Phase H.4 is implemented. Do
-  not substitute structural validation for human verification of business facts.
+- The production-readiness gate is mandatory before deployment. Do not substitute
+  structural validation for human verification of business facts.

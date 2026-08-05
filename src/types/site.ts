@@ -2,6 +2,7 @@
 export type {
   Branding,
   Business,
+  ContentState,
   ConversionConfig,
   FooterConfig,
   GeoCoordinates,

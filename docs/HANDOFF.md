@@ -2,7 +2,7 @@
 
 **Written:** 2026-08-04
 **Repo:** `ndxtraders/authority-site-generator-gpt`
-**State:** Phases 0–3 and H.1–H.3 complete. Start at H.4.
+**State:** Phases 0–3 and H.1–H.4 complete. Start at H.5.
 
 > **Prime Directive:** Work only in the GPT local folder and GitHub repository. The local
 > and GitHub `authority-site-generator` upstreams are protected unless Rev proactively
@@ -30,26 +30,27 @@ and PRD win — this file is a summary, not the source of truth.
 
 ---
 
-## Start here — H.4, not Phase 4
+## Start here — H.5, not Phase 4
 
-The production-readiness review found that the architecture is sound but trust claims can
-still ship without verification, structured-data nodes are unsafe/disconnected, and no CI
-enforces the acceptance criteria. H.1–H.3 have closed the executable-content-contract,
-server-only-conversion-boundary, and lead-submission hardening findings.
+The production-readiness review found that the architecture is sound but required a
+stricter executable contract, conversion boundary, lead controls, truth gate, connected
+structured data, and CI. H.1–H.4 have closed the content-contract,
+server-only-conversion-boundary, lead-submission, and production-truth findings.
+Structured-data safety and automated enforcement remain.
 
 Phase H addresses those risks before the framework multiplies routes and niches:
 
 1. **H.1** — runtime schemas and strict content parsing — **complete**
 2. **H.2** — server-only conversion configuration — **complete**
 3. **H.3** — lead validation, timeout, and abuse controls — **complete**
-4. **H.4** — sample/verified content states and production truth gate — **next**
-5. **H.5** — JSON-LD safety, connected entities, and indexation
+4. **H.4** — sample/verified content states and production truth gate — **complete**
+5. **H.5** — JSON-LD safety, connected entities, and indexation — **next**
 6. **H.6** — automated tests, browser checks, and GitHub CI
 7. **H.7** — documentation reconciliation and v0.5.1 release
 
-Treat each task as one Codex session. H.3 is the completed checkpoint; begin H.4 in a
+Treat each task as one Codex session. H.4 is the completed checkpoint; begin H.5 in a
 fresh session. When its acceptance checks pass, commit, update `docs/SESSION.md`, and
-stop before H.5. Do not switch sessions in the middle of a failing build or partial
+stop before H.6. Do not switch sessions in the middle of a failing build or partial
 migration.
 
 ### H.1 checkpoint
@@ -73,8 +74,9 @@ migration.
 
 - Public content now contains display-safe conversion values only; the provider endpoint
   and authorization credential come from non-public deployment environment variables.
-- `src/lib/server/conversion-config.ts` is marked `server-only` and is the sole reader of
-  lead-provider environment variables.
+- `src/lib/server/conversion-config.ts` is marked `server-only` and is the application's
+  sole reader of lead-provider environment variables. The production verification CLI
+  checks endpoint presence and shape operationally without logging its value.
 - The ContactForm Client Component receives UI copy only. The Server Action re-reads the
   validated thank-you path and never accepts a redirect or provider setting from the client.
 - Operational form logs contain request ID, status category, and duration only. Raw name,
@@ -107,11 +109,36 @@ migration.
 - H.3 checks passed: validation (5 pages, 8 known warnings), lint, TypeScript, 42 tests,
   and a 16-route production build.
 
+### H.4 checkpoint
+
+- `content/site.json` now declares the public-safe `contentState`; current roofing
+  content is explicitly `sample`, so it can build for development but cannot pass the
+  production gate.
+- `content/production.json` is the separate evidence ledger. It is schema-validated but
+  never imported by the application loader, keeping reviewer/source references out of
+  public content.
+- The ledger inventories 19 current claim groups across Services, WhyChooseUs, Proof,
+  Testimonials, licence/insurance, availability, warranty, insurance support, local
+  expertise, and other detected trust language. Every current claim remains pending.
+- `src/lib/production-readiness.ts` detects structured and risky trust claims and rejects
+  unverified claims, stale evidence paths, or new claim paths absent from the ledger.
+- `npm run verify:production` also rejects sample status, reserved phones, incomplete
+  identity/NAP/schema data, missing provider delivery, missing real images, and pending
+  human reviews.
+- `docs/DEPLOYMENT.md` names the required source and accountable reviewer for business
+  identity, local knowledge, testimonials/ratings, legal language, GBP alignment, rate
+  control, and image rights.
+- H.4 checks passed: development validation (5 pages, 9 expected warnings), lint,
+  TypeScript, 67 tests, and a 16-route production build. The current site failed
+  production verification as required with 39 documented blockers and no un-inventoried
+  detected trust claims; production-ledger claim IDs and fixture evidence sentinels were
+  absent from built output.
+
 ---
 
 ## What already exists
 
-Phases 0–3 and H.1–H.3 are done. You are extending a working framework, not starting one.
+Phases 0–3 and H.1–H.4 are done. You are extending a working framework, not starting one.
 
 | Thing | Where | Notes |
 |---|---|---|
@@ -126,6 +153,9 @@ Phases 0–3 and H.1–H.3 are done. You are extending a working framework, not 
 | Public conversion config | `src/types/site.ts` → `ConversionConfig`, `content/site.json` → `conversion` block | Display-safe `trackingPhone`, `displayPhone`, `thankYouPath`, and `model` only |
 | Server conversion config | `src/lib/server/conversion-config.ts` | Reads non-public `LEAD_DELIVERY_ENDPOINT` and optional `LEAD_DELIVERY_AUTHORIZATION`; never import into a Client Component |
 | Lead submission contract | `src/lib/contact-submission.ts` | Validates/normalizes input, enforces spam and size controls, applies provider timeout/acknowledgment/idempotency rules, and emits metadata-only outcomes |
+| Content lifecycle | `content/site.json` → `contentState` | Public-safe `sample`/`verified` state; current content is `sample` |
+| Production evidence | `content/production.json` | Non-application claim and human-review ledger; never import into the site loader |
+| Production gate | `src/lib/production-readiness.ts` + `scripts/verify-production.mts` | Rejects launch blockers and unsupported trust claims; run with `npm run verify:production` |
 | Click-to-call | `src/components/common/CallLink.tsx` | Plain `<a href="tel:...">`, styled via `buttonVariants()` where it needs to look like a button — **not** `Button`'s `render` prop (injects `role="button"` onto real links, wrong) |
 | Contact form | `src/components/forms/ContactForm.tsx` + `src/lib/actions/contact.ts` | Accessible `useActionState` form with honeypot/timing/idempotency fields; the thin Server Action injects trusted configuration and redirects only after confirmed delivery |
 | Legal pages | `src/lib/legal.ts` + `src/app/(legal)/[slug]/page.tsx` | Generated templates, real business fields only, **not legal-reviewed** |
@@ -302,7 +332,8 @@ not per-niche forks), which is Rev's call, not yours.
    is selected and the deployment owner records activation evidence.
 9. **Current proof and testimonial content is not verified.** The development sample
    includes licence/insurance language, numerical statistics, response-time claims, and
-   testimonials that must be sourced or removed. H.4.
+   testimonials. H.4 inventories every detected path and blocks production; the 19 claim
+   groups must still be sourced or removed by accountable humans.
 10. **Schema and indexation need correction.** JSON-LD needs safe serialization and
     connected `@id` references; `/thank-you` must be noindex and leave the sitemap. H.5.
 11. **Focused content-contract and lead-submission tests exist, but CI and the full

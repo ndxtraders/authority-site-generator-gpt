@@ -41,6 +41,7 @@ function stringProperty(record: Record<string, unknown>, key: string): string {
 function baseSite() {
   return {
     url: "https://authority.test",
+    contentState: "sample",
     business: {
       name: "Authority Test",
       industry: "Testing",

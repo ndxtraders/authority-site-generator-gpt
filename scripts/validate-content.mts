@@ -15,6 +15,7 @@ import { fileURLToPath } from "node:url";
 
 import {
   ContentContractError,
+  ProductionVerificationSchema,
   parseContentBundle,
   type PageContent,
   type RawPageRecord,
@@ -23,6 +24,7 @@ import {
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const CONTENT = join(ROOT, "content");
 const PAGES_DIR = join(CONTENT, "pages");
+const PRODUCTION_SOURCE = "content/production.json";
 
 const errors: string[] = [];
 const warnings: string[] = [];
@@ -108,6 +110,7 @@ if (!existsSync(PAGES_DIR)) {
 
 const siteSource = "content/site.json";
 const siteData = readJson(join(CONTENT, "site.json"));
+const productionData = readJson(join(CONTENT, "production.json"));
 const pageFiles = readdirSync(PAGES_DIR).filter((file) => file.endsWith(".json")).sort();
 const pageRecords: RawPageRecord[] = pageFiles.map((file) => {
   const slug = file.slice(0, -".json".length);
@@ -120,6 +123,19 @@ const pageRecords: RawPageRecord[] = pageFiles.map((file) => {
 
 scanStrings(siteData, siteSource);
 for (const record of pageRecords) scanStrings(record.data, record.source);
+scanStrings(productionData, PRODUCTION_SOURCE);
+
+if (!hasInvalidJson) {
+  const productionResult = ProductionVerificationSchema.safeParse(productionData);
+  if (!productionResult.success) {
+    for (const issue of productionResult.error.issues) {
+      error(
+        PRODUCTION_SOURCE,
+        `${issue.path.map(String).join(".") || "value"}: ${issue.message}`,
+      );
+    }
+  }
+}
 
 let parsed:
   | {
@@ -148,6 +164,12 @@ if (!hasInvalidJson) {
 
 if (parsed) {
   const { business } = parsed.site;
+  if (parsed.site.contentState === "sample") {
+    warn(
+      siteSource,
+      'contentState is "sample" — development builds are allowed, production verification will fail',
+    );
+  }
   const nap: Array<[string, unknown]> = [
     ["business.licenseNumber", business.licenseNumber],
     ["business.address.street", business.address.street],

@@ -1,7 +1,7 @@
 # Current Session
 
-**Version:** v0.5 complete; v0.5.1 H.1–H.3 complete
-**Phase:** H.4 — truth and production-readiness gates is next
+**Version:** v0.5 complete; v0.5.1 H.1–H.4 complete
+**Phase:** H.5 — indexation and structured-data safety is next
 **First market:** Modesto, CA (roofing)
 **Authorized repo:** `ndxtraders/authority-site-generator-gpt`
 
@@ -14,8 +14,9 @@ clean build, then identified hardening work that must precede page and niche exp
 
 The PRD is now v1.1 with decisions D7–D11. `docs/IMPLEMENTATION_PLAN.md` contains Phase H,
 seven sequenced v0.5.1 tasks. H.1 provides the shared executable content contract, H.2
-isolates lead-delivery configuration on the server, and H.3 validates and protects lead
-submission; H.4–H.7 remain. Each H task is a natural Codex session boundary.
+isolates lead-delivery configuration on the server, H.3 validates and protects lead
+submission, and H.4 separates sample content from verified production evidence; H.5–H.7
+remain. Each H task is a natural Codex session boundary.
 
 ## Completed in the planning session
 
@@ -108,14 +109,49 @@ H.3 verification results:
 - `npm test` — passed, 42/42
 - `npm run build` — passed, 16 routes generated
 
+## Completed in H.4
+
+- Added required `contentState: "sample" | "verified"` to the public content contract;
+  current roofing content is explicitly `sample`
+- Added `content/production.json` as a separate, non-application evidence ledger for
+  claim locations, sources, reviewers, dates, and human-owned reviews
+- Inventoried 19 current claim groups across all detected Services, WhyChooseUs, Proof,
+  Testimonials, response-time, licence/insurance, warranty, insurance-support, local
+  expertise, and trust-language paths; all remain pending rather than being fabricated
+- Added `src/lib/production-readiness.ts` and `npm run verify:production`, which reject
+  sample state, reserved phones, incomplete identity/schema fields, missing provider
+  delivery, missing real images, incomplete human review, unverified/stale claims, and
+  unsupported trust claims absent from the ledger
+- Kept the development build usable: the ordinary validator checks the evidence schema
+  and emits an explicit sample warning without treating real-world launch dependencies as
+  structural errors
+- Added a fully verified passing fixture and named failing fixtures for every H.4 blocker
+  category, including unsupported new trust content
+- Updated the deployment checklist with the required source and accountable reviewer for
+  business identity, local knowledge, testimonials/ratings, legal text, GBP alignment,
+  rate control, and image rights
+
+H.4 verification results:
+
+- `npm run validate` — passed, 5 pages checked; 9 expected development warnings
+- `npm run verify:production` — failed as required with 39 documented blockers on the
+  current sample content; no detected trust claim is missing from the evidence ledger
+- `npm run lint` — passed
+- `npx tsc --noEmit` — passed
+- `npm test` — passed, 67/67
+- `npm run build` — passed, 16 routes generated (required network access for configured
+  Google fonts)
+- Production-ledger claim IDs and fixture evidence sentinels — absent from built output
+
 ## Next — exact starting point
 
-Start a fresh Codex task for **H.4 — Add truth and production-readiness gates** in
-`docs/IMPLEMENTATION_PLAN.md`. Do not start H.5 or Phase 4.
+Start a fresh Codex task for **H.5 — Correct indexation and structured-data safety** in
+`docs/IMPLEMENTATION_PLAN.md`. Do not start H.6 or Phase 4.
 
-H.4 begins by adding an explicit `sample` versus `verified` content state, then adds a
-production-only verification command and factual-claim inventory. Do not invent business
-facts or mark sample claims verified without accountable sources.
+Preserve H.4's split: `contentState` is public-safe site content,
+`content/production.json` is verification evidence, and the latter must not enter the
+application loader or browser payloads. Do not mark pending facts verified without the
+recorded source and accountable human reviewer required by `docs/DEPLOYMENT.md`.
 
 ## Known launch blockers
 
@@ -123,7 +159,9 @@ facts or mark sample claims verified without accountable sources.
 - Address, postal code, geo, hours, sameAs, and licence number are incomplete
 - Form delivery is not configured because no provider endpoint has been selected
 - Provider/edge rate control is documented but cannot be activated until a provider is selected
-- Current trust statistics and testimonials have not been verified
+- All 19 current trust/service claim groups remain pending in `content/production.json`
+- Business identity, local knowledge, testimonials, legal, GBP, rate-control, and
+  image-rights human reviews remain pending
 - Generated legal templates have not been reviewed by counsel
 - Review/AggregateRating schema has no verified ratings and is not entity-connected
 - The thank-you page is currently indexable and in the sitemap
@@ -142,3 +180,6 @@ start the next numbered task in a fresh Codex session.
 Only `authority-site-generator-gpt` is authorized for edits and pushes. The local and
 GitHub `authority-site-generator` upstreams are protected and must not be modified unless
 Rev proactively initiates that exact request.
+
+Intentional local-only state: `Archive/h4-pre-change-2026-08-04/` contains the required
+pre-edit safety copies for H.4. It is untracked and excluded from the product checkpoint.
