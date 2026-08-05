@@ -2,8 +2,8 @@
 
 **Written:** 2026-08-04
 **Repo:** `ndxtraders/authority-site-generator-gpt`
-**State:** Phases 0–3 and H.1–H.5 complete. Start at H.6.
-**Published checkpoint:** local `main` and GitHub `origin/main` include H.5.
+**State:** Phases 0–3 and H.1–H.6 complete. Start at H.7.
+**Published checkpoint:** GitHub branch `agent/v0-5-1-h6` includes H.6; `main` remains at H.5.
 
 > **Prime Directive:** Work only in the GPT local folder and GitHub repository. The local
 > and GitHub `authority-site-generator` upstreams are protected unless Rev proactively
@@ -15,8 +15,8 @@
 
 1. `docs/FRAMEWORK_PRD.md` — what we're building. **Source of truth.** If anything
    contradicts it, the PRD wins.
-2. `docs/IMPLEMENTATION_PLAN.md` — your task list. Phase H (v0.5.1) is active; H.6 is
-   next, and H.1–H.7 must finish before Phase 4.
+2. `docs/IMPLEMENTATION_PLAN.md` — your task list. Phase H (v0.5.1) is active; H.7 is
+   next, and it must finish before Phase 4.
 3. `docs/SESSION.md` — current status snapshot and the "known stubs" list (do not ship
    items). Kept up to date at the end of every phase; trust it over memory.
 4. `docs/CHANGELOG.md` — what shipped in each version, in more implementation detail
@@ -36,21 +36,23 @@ and PRD win — this file is a summary, not the source of truth.
 > `authority-site-generator` repositories. Read `AGENTS.md`, `README.md`,
 > `docs/FRAMEWORK_PRD.md`, `docs/IMPLEMENTATION_PLAN.md`, `docs/SESSION.md`, and
 > `docs/HANDOFF.md`, then verify `pwd`, `git remote -v`, branch, and status. Start and
-> complete H.6 only: automated unit and negative fixture tests, production-build
-> integration assertions, browser coverage, and GitHub CI. Preserve H.5's safe JSON-LD,
-> connected entity IDs, verified-rating gate, explicit indexation field, truthful
-> sitemap, and valid manifest asset. Run all H.6 acceptance checks, update the
-> session/handoff documents, commit and push the checkpoint, then stop before H.7.
+> complete H.7 only: reconcile package and documentation versions, document runtime
+> schemas, sample-versus-verified content, server-only conversion configuration,
+> production verification, tests, CI, and `/contact`; audit all documented paths and
+> workflow claims; run `npm run verify` and inspect production output; update the handoff
+> so Phase 4.1 is next. Commit and push the v0.5.1 release checkpoint, then stop before
+> Phase 4.
 
 ---
 
-## Start here — H.6, not Phase 4
+## Start here — H.7, not Phase 4
 
 The production-readiness review found that the architecture is sound but required a
 stricter executable contract, conversion boundary, lead controls, truth gate, connected
-structured data, and CI. H.1–H.5 have closed the content-contract,
-server-only-conversion-boundary, lead-submission, production-truth, and structured-data
-findings. Automated enforcement remains.
+structured data, and CI. H.1–H.6 have closed the content-contract,
+server-only-conversion-boundary, lead-submission, production-truth, structured-data, and
+automated-enforcement findings. Documentation reconciliation and the release checkpoint
+remain.
 
 Phase H addresses those risks before the framework multiplies routes and niches:
 
@@ -59,12 +61,12 @@ Phase H addresses those risks before the framework multiplies routes and niches:
 3. **H.3** — lead validation, timeout, and abuse controls — **complete**
 4. **H.4** — sample/verified content states and production truth gate — **complete**
 5. **H.5** — JSON-LD safety, connected entities, and indexation — **complete**
-6. **H.6** — automated tests, browser checks, and GitHub CI — **next**
-7. **H.7** — documentation reconciliation and v0.5.1 release
+6. **H.6** — automated tests, browser checks, and GitHub CI — **complete**
+7. **H.7** — documentation reconciliation and v0.5.1 release — **next**
 
-Treat each task as one Codex session. H.5 is the completed checkpoint; begin H.6 in a
+Treat each task as one Codex session. H.6 is the completed checkpoint; begin H.7 in a
 fresh session. When its acceptance checks pass, commit, update `docs/SESSION.md`, and
-stop before H.7. Do not switch sessions in the middle of a failing build or partial
+stop before Phase 4. Do not switch sessions in the middle of a failing build or partial
 migration.
 
 ### H.1 checkpoint
@@ -171,11 +173,35 @@ migration.
   tests, and a 16-route production build. Production verification still failed on the
   documented real-world blockers, as required.
 
+### H.6 checkpoint
+
+- The native Node runner remains the unit harness; `tsx` supplies reliable TypeScript,
+  JSON-import, and `@/` alias loading without changing production dependencies.
+- `src/lib/content-quality.ts` is the shared pure seam for placeholder scanning,
+  development warnings, CTA enforcement, and location-specificity rules. The CLI
+  validator delegates to it, and negative fixtures assert exact failure reasons.
+- The 84-test unit suite now covers runtime schemas, content loading, URL assembly,
+  metadata, schema builders, legal generation, production readiness, and contact
+  submission behavior.
+- `scripts/run-build-integration.mts` builds with sentinel server-only configuration;
+  `tests/build-output.integration.mts` asserts 9 HTML routes, unique titles/canonicals,
+  explicit indexation, safe connected JSON-LD, `tel:` links, truthful sitemap/manifest,
+  and no endpoint, authorization, or environment name in browser-delivered output.
+- Playwright tests run against `next start` at 375px. Mobile navigation passed keyboard,
+  Escape, and selection checks; contact validation and unconfigured-delivery states are
+  accessible and metadata-only. A browser-discovered reset of hidden retry metadata was
+  fixed while preserving the stable submission ID across attempts.
+- `.github/workflows/ci.yml` installs dependencies and Chromium, then runs the same
+  documented `npm run verify` command on every push and pull request.
+- H.6 checks passed: validation (5 pages, 9 expected warnings), lint, TypeScript, 84 unit
+  tests, a 16-route production build, 5 build integration checks, and 2 Chromium tests.
+  Production verification still fails on the same 39 documented blockers, as required.
+
 ---
 
 ## What already exists
 
-Phases 0–3 and H.1–H.5 are done. You are extending a working framework, not starting one.
+Phases 0–3 and H.1–H.6 are done. You are extending a working framework, not starting one.
 
 | Thing | Where | Notes |
 |---|---|---|
@@ -197,6 +223,8 @@ Phases 0–3 and H.1–H.5 are done. You are extending a working framework, not 
 | Contact form | `src/components/forms/ContactForm.tsx` + `src/lib/actions/contact.ts` | Accessible `useActionState` form with honeypot/timing/idempotency fields; the thin Server Action injects trusted configuration and redirects only after confirmed delivery |
 | Legal pages | `src/lib/legal.ts` + `src/app/(legal)/[slug]/page.tsx` | Generated templates, real business fields only, **not legal-reviewed** |
 | Mobile nav | `src/components/layout/MobileNav.tsx` | Client component isolated from `Header` (stays a Server Component); native `<button>`/`<Link>`, `aria-expanded`/`aria-controls`, closes on Escape/selection |
+| Test harness | `tests/`, `playwright.config.ts`, `docs/TESTING.md` | 84 unit/fixture tests, 5 built-output assertions, 2 Chromium browser checks; `npm run verify` is the clean-checkout command |
+| CI | `.github/workflows/ci.yml` | Runs the full verification command on every push and pull request |
 
 All pages are still thin orchestrators. There is **no business copy in `src/`** — keep it
 that way.
@@ -345,9 +373,8 @@ not per-niche forks), which is Rev's call, not yours.
 2. **Legal pages need real legal review.** `src/lib/legal.ts` generates from real
    business fields only, no fabricated claims — but it's a template, not counsel-reviewed
    content.
-3. **Mobile nav's keyboard-only behavior was verified via built HTML output, not an
-   actual browser.** No browser automation tool was available in the Phase 3 session. Do
-   a manual pass at 375px before shipping if one still hasn't happened.
+3. **Mobile nav browser verification was completed in H.6.** Playwright exercises the
+   real production build at 375px using Tab, Enter, Space, Escape, and link selection.
 4. **NAP data is incomplete** — `business.address.street`, `postalCode`, `geo`, `hours`,
    `sameAs`, `licenseNumber` are all empty; phone is a 555 placeholder. The validator
    warns on all six (does not fail the build). **Do not invent values** — these are
@@ -375,9 +402,9 @@ not per-niche forks), which is Rev's call, not yours.
 10. **Schema and indexation safety was completed in H.5.** Preserve safe serialization,
     connected stable IDs, verified-only ratings, explicit indexation, truthful sitemap
     dates, and valid manifest assets.
-11. **Focused content-contract, lead-submission, production-readiness, and schema-safety
-    tests exist, but CI and the full framework regression suite do not.** H.6 completes
-    coverage before routing and niche expansion.
+11. **The H.6 regression suite and CI are complete.** Preserve the shared validator
+    fixtures, sentinel production-build assertions, Playwright checks, and the single
+    `npm run verify` command as routing and niche coverage expand.
 
 ---
 

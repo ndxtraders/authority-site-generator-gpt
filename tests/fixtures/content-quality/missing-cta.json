@@ -1,0 +1,21 @@
+{
+  "slug": "about",
+  "pageType": "about",
+  "seo": {
+    "title": "About the Test Business",
+    "description": "A structurally valid page without a conversion action.",
+    "canonicalPath": "/about",
+    "indexable": true
+  },
+  "schema": [],
+  "sections": [
+    {
+      "type": "Answer",
+      "props": {
+        "question": "What does this page explain?",
+        "answer": "It demonstrates a page that contains useful copy but no call to action."
+      }
+    }
+  ],
+  "internalLinks": ["/"]
+}

@@ -10,7 +10,11 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test tests/*.test.mts"
+    "typecheck": "tsc --noEmit",
+    "test": "node --import tsx --test tests/*.test.mts",
+    "test:build": "node --import tsx scripts/run-build-integration.mts",
+    "test:browser": "playwright test",
+    "verify": "npm run validate && npm run lint && npm run typecheck && npm test && npm run test:build && npm run test:browser"
   },
   "dependencies": {
     "@base-ui/react": "^1.6.0",
@@ -26,6 +30,7 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@playwright/test": "^1.62.1",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
@@ -33,6 +38,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.2.12",
     "tailwindcss": "^4",
+    "tsx": "^4.23.6",
     "typescript": "^5"
   }
 }

@@ -1,7 +1,7 @@
 # Current Session
 
-**Version:** v0.5 complete; v0.5.1 H.1–H.5 complete
-**Phase:** H.6 — automated tests, browser checks, and CI is next
+**Version:** v0.5 complete; v0.5.1 H.1–H.6 complete
+**Phase:** H.7 — documentation reconciliation and v0.5.1 release is next
 **First market:** Modesto, CA (roofing)
 **Authorized repo:** `ndxtraders/authority-site-generator-gpt`
 
@@ -15,9 +15,9 @@ clean build, then identified hardening work that must precede page and niche exp
 The PRD is now v1.1 with decisions D7–D11. `docs/IMPLEMENTATION_PLAN.md` contains Phase H,
 seven sequenced v0.5.1 tasks. H.1 provides the shared executable content contract, H.2
 isolates lead-delivery configuration on the server, H.3 validates and protects lead
-submission, H.4 separates sample content from verified production evidence, and H.5
-completes structured-data and indexation safety; H.6–H.7 remain. Each H task is a natural
-Codex session boundary.
+submission, H.4 separates sample content from verified production evidence, H.5
+completes structured-data and indexation safety, and H.6 adds regression coverage and
+CI; H.7 remains. Each H task is a natural Codex session boundary.
 
 ## Completed in the planning session
 
@@ -179,10 +179,45 @@ H.5 verification results:
 - Official schema.org validator — 0 errors and 0 warnings across 6 connected items:
   BreadcrumbList, WebSite, Service, Review, AggregateRating, and FAQPage
 
+## Completed in H.6
+
+- Kept the native Node test runner and added `tsx` only for reliable application-module
+  loading; expanded unit coverage for the parsed content loader, URL assembly, metadata,
+  legal generation, and existing contact/schema/production contracts
+- Extracted authored-content and anti-thin checks into `src/lib/content-quality.ts` so
+  the validator and fixture suite execute the same placeholder, CTA, NAP-warning, and
+  local-specificity rules
+- Added negative fixtures for placeholder content, missing CTAs, and thin location pages;
+  combined with H.1–H.5 fixtures, the unit suite now contains 84 tests that assert failure
+  reasons for schema, canonical, link, truth-gate, form-boundary, and schema-safety defects
+- Added a sentinel production-build runner and 5 integration assertions covering all 9
+  HTML routes, unique titles/canonicals, explicit indexation, truthful sitemap/manifest,
+  connected JSON-LD, `tel:` links, and absence of server-only configuration from client
+  assets and built browser payloads
+- Added Playwright Chromium coverage at 375px for keyboard mobile navigation, Escape and
+  selection closure, accessible contact field errors, unconfigured-delivery errors, and
+  stable retry idempotency metadata
+- Fixed the browser-discovered retry defect by restoring the same client-generated timing
+  and submission ID values after each completed Server Action
+- Added `.github/workflows/ci.yml` for every push and pull request and documented the one
+  clean-checkout command, `npm run verify`, in `docs/TESTING.md`
+
+H.6 verification results:
+
+- `npm run verify` — passed end to end
+- Development validation — passed, 5 pages checked; 9 expected warnings
+- ESLint and TypeScript — passed
+- Unit/negative-fixture suite — passed, 84/84
+- Sentinel production build — passed, 16 routes generated
+- Production-build integration suite — passed, 5/5
+- Playwright Chromium suite — passed, 2/2 at 375px
+- `npm run verify:production` — failed as required with the same 39 documented real-world
+  blockers; current sample content remains impossible to mistake for production-ready
+
 ## Next — exact starting point
 
-Start a fresh Codex task for **H.6 — Add automated tests and CI** in
-`docs/IMPLEMENTATION_PLAN.md`. Do not start H.7 or Phase 4.
+Start a fresh Codex task for **H.7 — Reconcile documentation and release v0.5.1** in
+`docs/IMPLEMENTATION_PLAN.md`. Do not start Phase 4 before H.7 passes.
 
 Preserve H.4's split: `contentState` is public-safe site content,
 `content/production.json` is verification evidence, and the latter must not enter the
@@ -202,8 +237,6 @@ recorded source and accountable human reviewer required by `docs/DEPLOYMENT.md`.
 - Review/AggregateRating schema is connected and safely gated, but current content has no
   verified ratings to emit
 - Starter assets remain and real, rights-cleared production images are still required
-- Mobile navigation has not had a real browser keyboard pass
-- No CI or full framework regression suite protects the acceptance criteria yet
 
 ## Session checkpoint rule
 
@@ -219,5 +252,6 @@ Rev proactively initiates that exact request.
 
 Intentional local-only state: `Archive/h4-pre-change-2026-08-04/` and
 `Archive/h5-pre-change-2026-08-04/` contain required pre-edit safety copies. The
-pre-existing `Archive/handoff-main-publish-2026-08-04/` also remains untracked. All three
-are excluded from the product checkpoint.
+pre-existing `Archive/handoff-main-publish-2026-08-04/` also remains untracked.
+`Archive/h6-pre-change-2026-08-04.tar.gz` is the H.6 recovery snapshot. All four are
+excluded from the product checkpoint.

@@ -1,0 +1,24 @@
+{
+  "slug": "test-city",
+  "pageType": "location",
+  "seo": {
+    "title": "Service in Test City",
+    "description": "A structurally valid location page without specific local evidence.",
+    "canonicalPath": "/service-area/test-city",
+    "indexable": true
+  },
+  "schema": [],
+  "sections": [
+    {
+      "type": "Hero",
+      "props": {
+        "eyebrow": "Service Area",
+        "headline": "Service in Test City",
+        "subheadline": "General service information for residents and property owners.",
+        "primaryButton": "Contact Us",
+        "secondaryButton": "Call"
+      }
+    }
+  ],
+  "internalLinks": ["/"]
+}

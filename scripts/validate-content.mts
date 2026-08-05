@@ -20,6 +20,10 @@ import {
   type PageContent,
   type RawPageRecord,
 } from "../src/lib/content-schema.ts";
+import {
+  assessParsedContentQuality,
+  scanAuthoredContent,
+} from "../src/lib/content-quality.ts";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const CONTENT = join(ROOT, "content");
@@ -31,61 +35,6 @@ const warnings: string[] = [];
 
 const error = (file: string, message: string) => errors.push(`${file} — ${message}`);
 const warn = (file: string, message: string) => warnings.push(`${file} — ${message}`);
-
-// ---------------------------------------------------------------------------
-// Placeholder detection
-// ---------------------------------------------------------------------------
-
-interface ContentPattern {
-  pattern: RegExp;
-  label: string;
-  /** Content paths where this pattern is legitimate rather than a defect. */
-  exempt?: RegExp;
-}
-
-/** Hard failures. Content that is definitively unfinished. */
-const PLACEHOLDER_PATTERNS: ContentPattern[] = [
-  { pattern: /555-5555|555 5555/i, label: "placeholder phone number (555-5555)" },
-  { pattern: /content coming soon/i, label: '"Content coming soon" placeholder' },
-  { pattern: /lorem ipsum/i, label: "lorem ipsum filler" },
-  { pattern: /\bTODO\b|\bTBD\b/, label: "TODO/TBD marker" },
-  {
-    pattern: /example\.com/i,
-    label: "example.com placeholder",
-    // Form inputs are supposed to show example text — "you@example.com" in a
-    // placeholder attribute is correct UI, not unfinished content.
-    exempt: /\.placeholder$/,
-  },
-  { pattern: /\byour (business|company) name\b/i, label: "unreplaced template token" },
-];
-
-/** Softer signals. Real but suspicious — reported, not fatal. */
-const SUSPICIOUS_PATTERNS: Array<[RegExp, string]> = [
-  [/\(\d{3}\)\s*555-\d{4}/, "phone number uses the 555 reserved range"],
-  [/\b\d{3}-555-\d{4}\b/, "phone number uses the 555 reserved range"],
-];
-
-function scanStrings(value: unknown, file: string, path = ""): void {
-  if (typeof value === "string") {
-    for (const { pattern, label, exempt } of PLACEHOLDER_PATTERNS) {
-      if (exempt?.test(path)) continue;
-      if (pattern.test(value)) error(file, `${path || "value"} contains ${label}`);
-    }
-    for (const [pattern, label] of SUSPICIOUS_PATTERNS) {
-      if (pattern.test(value)) warn(file, `${path || "value"}: ${label}`);
-    }
-    return;
-  }
-  if (Array.isArray(value)) {
-    value.forEach((item, index) => scanStrings(item, file, `${path}[${index}]`));
-    return;
-  }
-  if (value && typeof value === "object") {
-    for (const [key, child] of Object.entries(value)) {
-      scanStrings(child, file, path ? `${path}.${key}` : key);
-    }
-  }
-}
 
 // ---------------------------------------------------------------------------
 // Load and parse through the shared executable contract
@@ -121,9 +70,15 @@ const pageRecords: RawPageRecord[] = pageFiles.map((file) => {
   };
 });
 
-scanStrings(siteData, siteSource);
-for (const record of pageRecords) scanStrings(record.data, record.source);
-scanStrings(productionData, PRODUCTION_SOURCE);
+for (const [value, source] of [
+  [siteData, siteSource],
+  ...pageRecords.map((record) => [record.data, record.source]),
+  [productionData, PRODUCTION_SOURCE],
+] as Array<[unknown, string]>) {
+  const result = scanAuthoredContent(value, source);
+  result.errors.forEach((issue) => error(issue.file, issue.message));
+  result.warnings.forEach((issue) => warn(issue.file, issue.message));
+}
 
 if (!hasInvalidJson) {
   const productionResult = ProductionVerificationSchema.safeParse(productionData);
@@ -163,54 +118,14 @@ if (!hasInvalidJson) {
 // ---------------------------------------------------------------------------
 
 if (parsed) {
-  const { business } = parsed.site;
-  if (parsed.site.contentState === "sample") {
-    warn(
-      siteSource,
-      'contentState is "sample" — development builds are allowed, production verification will fail',
-    );
-  }
-  const nap: Array<[string, unknown]> = [
-    ["business.licenseNumber", business.licenseNumber],
-    ["business.address.street", business.address.street],
-    ["business.address.postalCode", business.address.postalCode],
-    ["business.geo.latitude", business.geo.latitude],
-    ["business.hours", business.hours],
-    ["business.sameAs", business.sameAs],
-  ];
-
-  for (const [label, value] of nap) {
-    const empty = value === "" || (Array.isArray(value) && value.length === 0);
-    if (empty) warn(siteSource, `${label} is empty — LocalBusiness schema will be incomplete`);
-  }
-
-  parsed.pages.forEach((page, index) => {
-    const file = pageRecords[index].source;
-    const sectionTypes = page.sections.map((section) => section.type);
-    const hasCta = sectionTypes.some(
-      (type) =>
-        type === "CTA" ||
-        type === "ContactForm" ||
-        type === "ContactInfo" ||
-        type === "Hero",
-    );
-    if (!hasCta) error(file, "has no call to action (CTA, ContactForm, ContactInfo, or Hero)");
-
-    if (page.internalLinks.length === 0) warn(file, "has no internal links");
-
-    // Location pages must carry genuine local detail (PRD §7).
-    if (page.pageType === "location") {
-      const text = JSON.stringify(page).toLowerCase();
-      const signals = ["neighborhood", "climate", "permit", "county", "weather", "soil"];
-      const found = signals.filter((signal) => text.includes(signal));
-      if (found.length < 2) {
-        error(
-          file,
-          `location page lacks local specificity — needs at least 2 of: ${signals.join(", ")}`,
-        );
-      }
-    }
-  });
+  const result = assessParsedContentQuality(
+    parsed.site,
+    parsed.pages,
+    pageRecords.map((record) => record.source),
+    siteSource,
+  );
+  result.errors.forEach((issue) => error(issue.file, issue.message));
+  result.warnings.forEach((issue) => warn(issue.file, issue.message));
 }
 
 // ---------------------------------------------------------------------------

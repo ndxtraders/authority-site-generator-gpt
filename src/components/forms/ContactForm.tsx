@@ -19,11 +19,18 @@ export default function ContactForm({
   const [state, formAction, isPending] = useActionState(submitContactForm, INITIAL_STATE);
   const startedAtRef = useRef<HTMLInputElement>(null);
   const submissionIdRef = useRef<HTMLInputElement>(null);
+  const startedAtValueRef = useRef<string | null>(null);
+  const submissionIdValueRef = useRef<string | null>(null);
 
   useEffect(() => {
-    if (startedAtRef.current) startedAtRef.current.value = String(Date.now());
-    if (submissionIdRef.current) submissionIdRef.current.value = crypto.randomUUID();
-  }, []);
+    if (isPending) return;
+    startedAtValueRef.current ??= String(Date.now());
+    submissionIdValueRef.current ??= crypto.randomUUID();
+    if (startedAtRef.current) startedAtRef.current.value = startedAtValueRef.current;
+    if (submissionIdRef.current) {
+      submissionIdRef.current.value = submissionIdValueRef.current;
+    }
+  }, [isPending]);
 
   const fieldError = (field: keyof NonNullable<ContactFormState["fieldErrors"]>) =>
     state.fieldErrors?.[field];
