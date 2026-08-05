@@ -3,6 +3,7 @@
 **Written:** 2026-08-04
 **Repo:** `ndxtraders/authority-site-generator-gpt`
 **State:** Phases 0–3 and H.1–H.4 complete. Start at H.5.
+**Published checkpoint:** local `main` and GitHub `origin/main` include H.4.
 
 > **Prime Directive:** Work only in the GPT local folder and GitHub repository. The local
 > and GitHub `authority-site-generator` upstreams are protected unless Rev proactively
@@ -14,8 +15,8 @@
 
 1. `docs/FRAMEWORK_PRD.md` — what we're building. **Source of truth.** If anything
    contradicts it, the PRD wins.
-2. `docs/IMPLEMENTATION_PLAN.md` — your task list. Phase H (v0.5.1) is next; H.1–H.7
-   must finish before Phase 4.
+2. `docs/IMPLEMENTATION_PLAN.md` — your task list. Phase H (v0.5.1) is active; H.5 is
+   next, and H.1–H.7 must finish before Phase 4.
 3. `docs/SESSION.md` — current status snapshot and the "known stubs" list (do not ship
    items). Kept up to date at the end of every phase; trust it over memory.
 4. `docs/CHANGELOG.md` — what shipped in each version, in more implementation detail
@@ -27,6 +28,19 @@
 Don't start work by re-deriving context that's already written down in one of the five
 files above. If something in this handoff conflicts with the plan or the PRD, the plan
 and PRD win — this file is a summary, not the source of truth.
+
+## Copy/paste starter for the next session
+
+> Work only in `/Users/raulvaughn/Documents/authority-site-generator-gpt` and
+> `ndxtraders/authority-site-generator-gpt`; do not modify the protected upstream
+> `authority-site-generator` repositories. Read `AGENTS.md`, `README.md`,
+> `docs/FRAMEWORK_PRD.md`, `docs/IMPLEMENTATION_PLAN.md`, `docs/SESSION.md`, and
+> `docs/HANDOFF.md`, then verify `pwd`, `git remote -v`, branch, and status. Start and
+> complete H.5 only: JSON-LD safety, connected entities, truthful indexation, sitemap,
+> and manifest corrections. Preserve H.4's `contentState`/`content/production.json`
+> boundary and never invent or mark business claims verified. Run all H.5 acceptance
+> checks, update the session/handoff documents, commit and push the checkpoint, then
+> stop before H.6.
 
 ---
 
