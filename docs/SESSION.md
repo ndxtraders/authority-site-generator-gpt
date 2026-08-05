@@ -1,7 +1,7 @@
 # Current Session
 
-**Version:** v0.5 complete; v0.5.1 H.1–H.2 complete
-**Phase:** H.3 — lead validation, timeout, and abuse controls is next
+**Version:** v0.5 complete; v0.5.1 H.1–H.3 complete
+**Phase:** H.4 — truth and production-readiness gates is next
 **First market:** Modesto, CA (roofing)
 **Authorized repo:** `ndxtraders/authority-site-generator-gpt`
 
@@ -13,9 +13,9 @@ navigation. An independent production-readiness review confirmed the architectur
 clean build, then identified hardening work that must precede page and niche expansion.
 
 The PRD is now v1.1 with decisions D7–D11. `docs/IMPLEMENTATION_PLAN.md` contains Phase H,
-seven sequenced v0.5.1 tasks. H.1 provides the shared executable content contract and
-H.2 isolates lead-delivery configuration on the server; H.3–H.7 remain. Each H task is
-a natural Codex session boundary.
+seven sequenced v0.5.1 tasks. H.1 provides the shared executable content contract, H.2
+isolates lead-delivery configuration on the server, and H.3 validates and protects lead
+submission; H.4–H.7 remain. Each H task is a natural Codex session boundary.
 
 ## Completed in the planning session
 
@@ -49,7 +49,7 @@ H.1 verification results:
 - `npm run validate` — passed, 5 pages checked; 8 existing development warnings
 - `npm run lint` — passed
 - `npx tsc --noEmit` — passed
-- `npm test` — passed, 16/16, including rejection of provider endpoints from public content
+- `npm test` — passed, 15/15
 - `npm run build` — passed, 16 routes generated (required network access for configured
   Google fonts)
 
@@ -70,7 +70,7 @@ H.2 verification results:
 - `npm run validate` — passed, 5 pages checked; 8 existing development warnings
 - `npm run lint` — passed
 - `npx tsc --noEmit` — passed
-- `npm test` — passed, 15/15
+- `npm test` — passed, 16/16, including rejection of provider endpoints from public content
 - Sentinel production build — passed, 16 routes generated
 - Sentinel endpoint, authorization value, and environment-variable names — absent from
   27 client static assets and 90 built HTML/RSC/text payloads
@@ -79,27 +79,57 @@ H.2 verification results:
 - Live mock-provider submission — provider accepted the server-only authorization value,
   then the action returned `303 Location: /thank-you`; success log contained metadata only
 
+## Completed in H.3
+
+- Added `src/lib/contact-submission.ts` as a framework-neutral, dependency-injected lead
+  validation and provider-delivery contract used by the Server Action
+- Added server-side normalization, required checks, per-field maximums, an 8 KB aggregate
+  limit, email validation, and a 10–15 digit practical phone policy
+- Rejected unexpected, duplicate, non-string, malformed, and oversized form fields before
+  any provider request
+- Added a client-populated honeypot, submission timestamp, and stable submission ID;
+  too-fast, stale, and bot-trap submissions fail with visitor-safe errors
+- Added accessible field errors with `aria-invalid`, `aria-describedby`, a form-level live
+  alert, and no echoing of submitted values
+- Added an eight-second timeout covering both the provider request and response body,
+  explicit network/non-2xx/malformed-response handling, and a required
+  `{ "accepted": true }` provider acknowledgment
+- Added `Idempotency-Key` and `X-Request-ID` headers; repeat attempts retain the same
+  idempotency key so a supporting provider can deduplicate them
+- Documented the provider contract, accountable rate-control owner, required thresholds,
+  and launch-blocking activation evidence in `docs/DEPLOYMENT.md`
+- Added 26 H.3 tests; the combined suite now contains 42 tests
+
+H.3 verification results:
+
+- `npm run validate` — passed, 5 pages checked; 8 existing development warnings
+- `npm run lint` — passed
+- `npx tsc --noEmit` — passed
+- `npm test` — passed, 42/42
+- `npm run build` — passed, 16 routes generated
+
 ## Next — exact starting point
 
-Start a fresh Codex task for **H.3 — Validate and protect lead submission** in
-`docs/IMPLEMENTATION_PLAN.md`. Do not start H.4 or Phase 4.
+Start a fresh Codex task for **H.4 — Add truth and production-readiness gates** in
+`docs/IMPLEMENTATION_PLAN.md`. Do not start H.5 or Phase 4.
 
-H.3 begins with bounded server-side field validation, then adds accessible errors,
-honeypot/timing controls, provider timeout and failure handling, and a documented
-rate-control owner. Preserve H.1's parser and H.2's server-only configuration boundary.
+H.4 begins by adding an explicit `sample` versus `verified` content state, then adds a
+production-only verification command and factual-claim inventory. Do not invent business
+facts or mark sample claims verified without accountable sources.
 
 ## Known launch blockers
 
 - Current business phone and tracking number use reserved 555 data
 - Address, postal code, geo, hours, sameAs, and licence number are incomplete
 - Form delivery is not configured because no provider endpoint has been selected
+- Provider/edge rate control is documented but cannot be activated until a provider is selected
 - Current trust statistics and testimonials have not been verified
 - Generated legal templates have not been reviewed by counsel
 - Review/AggregateRating schema has no verified ratings and is not entity-connected
 - The thank-you page is currently indexable and in the sitemap
 - Starter assets remain; the manifest references an icon that does not exist
 - Mobile navigation has not had a real browser keyboard pass
-- No project test suite or CI protects the acceptance criteria
+- No CI or full framework regression suite protects the acceptance criteria yet
 
 ## Session checkpoint rule
 

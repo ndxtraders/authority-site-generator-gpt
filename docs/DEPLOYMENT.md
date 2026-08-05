@@ -56,6 +56,36 @@ signing secret or another credential shape, add it as a non-public deployment va
 inside the same server-only module when the provider adapter is implemented; never place
 it in content or a Client Component.
 
+### Lead-provider contract
+
+The framework sends normalized JSON with `requestId`, `submissionId`, `name`, `phone`,
+`email`, and `message`. It also sends:
+
+- `Idempotency-Key: <submissionId>` so repeated attempts can be deduplicated
+- `X-Request-ID: <requestId>` for non-sensitive operational tracing
+- `Authorization` only when the server-only deployment value is configured
+
+The provider must return a 2xx JSON response containing `{ "accepted": true }`. Empty,
+non-JSON, negative-acknowledgment, non-2xx, network-error, and timeout responses are
+treated as delivery failures and never redirect the visitor. The complete request,
+including response-body parsing, has an eight-second application timeout.
+
+### Spam and rate-control ownership
+
+The form applies strict field and total-size limits, rejects unexpected fields, uses a
+honeypot and minimum submission time, and sends a stable idempotency key for duplicate
+attempts. These controls reduce low-effort abuse but do not replace durable rate control.
+
+**Accountable owner:** Rev Vaughn, as site deployment owner, must activate and record the
+provider/edge rate-control rule before public launch. The required baseline is a
+per-deployment cap of 10 delivery requests per minute with a burst no greater than 5,
+plus duplicate suppression for the `Idempotency-Key` for at least 24 hours. Record the
+provider name, rule identifier, configured thresholds, activation date, and test evidence
+in the deployment record. If the selected provider cannot enforce both controls, add a
+durable application-side limiter/idempotency store before launch. The current repository
+has no provider selected, so this remains an explicit launch blocker rather than a claim
+that rate limiting is already active.
+
 ## Post-deploy checklist
 
 - [ ] Verify Lighthouse ≥ 95 across all four categories
@@ -66,6 +96,8 @@ it in content or a Client Component.
 - [ ] Confirm every license, insurance, experience, availability, project-count, review, and testimonial claim has an accountable human source
 - [ ] Test click-to-call on a real mobile device
 - [ ] Submit a test lead through the form and confirm it arrives
+- [ ] Confirm Rev Vaughn (deployment owner) recorded an active rate-control rule: ≤10 requests/minute, burst ≤5, and `Idempotency-Key` suppression for ≥24 hours
+- [ ] Test the provider's accepted, duplicate, non-2xx, malformed-response, and timeout paths
 
 ## Rules
 

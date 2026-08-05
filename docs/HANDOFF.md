@@ -2,7 +2,7 @@
 
 **Written:** 2026-08-04
 **Repo:** `ndxtraders/authority-site-generator-gpt`
-**State:** Phases 0–3 and H.1–H.2 complete. Start at H.3.
+**State:** Phases 0–3 and H.1–H.3 complete. Start at H.4.
 
 > **Prime Directive:** Work only in the GPT local folder and GitHub repository. The local
 > and GitHub `authority-site-generator` upstreams are protected unless Rev proactively
@@ -30,27 +30,26 @@ and PRD win — this file is a summary, not the source of truth.
 
 ---
 
-## Start here — H.3, not Phase 4
+## Start here — H.4, not Phase 4
 
-The production-readiness review found that the architecture is sound but lead validation
-and abuse controls remain incomplete, trust claims can ship without verification,
-structured-data nodes are unsafe/disconnected, and no tests or CI enforce the acceptance
-criteria. H.1 and H.2 have already closed the executable-content-contract and
-server-only-conversion-boundary findings.
+The production-readiness review found that the architecture is sound but trust claims can
+still ship without verification, structured-data nodes are unsafe/disconnected, and no CI
+enforces the acceptance criteria. H.1–H.3 have closed the executable-content-contract,
+server-only-conversion-boundary, and lead-submission hardening findings.
 
 Phase H addresses those risks before the framework multiplies routes and niches:
 
 1. **H.1** — runtime schemas and strict content parsing — **complete**
 2. **H.2** — server-only conversion configuration — **complete**
-3. **H.3** — lead validation, timeout, and abuse controls — **next**
-4. **H.4** — sample/verified content states and production truth gate
+3. **H.3** — lead validation, timeout, and abuse controls — **complete**
+4. **H.4** — sample/verified content states and production truth gate — **next**
 5. **H.5** — JSON-LD safety, connected entities, and indexation
 6. **H.6** — automated tests, browser checks, and GitHub CI
 7. **H.7** — documentation reconciliation and v0.5.1 release
 
-Treat each task as one Codex session. H.2 is the completed checkpoint; begin H.3 in a
+Treat each task as one Codex session. H.3 is the completed checkpoint; begin H.4 in a
 fresh session. When its acceptance checks pass, commit, update `docs/SESSION.md`, and
-stop before H.4. Do not switch sessions in the middle of a failing build or partial
+stop before H.5. Do not switch sessions in the middle of a failing build or partial
 migration.
 
 ### H.1 checkpoint
@@ -86,11 +85,33 @@ migration.
   authenticated mock-provider delivery; only the successful provider response produced
   `303 Location: /thank-you`, and both paths logged metadata only.
 
+### H.3 checkpoint
+
+- `src/lib/contact-submission.ts` owns normalized server-side field validation, strict
+  field and aggregate limits, phone/email policies, spam checks, provider delivery, and
+  visitor-safe result shaping. It is framework-neutral so Node tests exercise the same
+  function the Server Action calls.
+- The Client Component supplies a honeypot, browser-start timestamp, and stable submission
+  ID. Accessible field errors identify invalid controls without echoing submitted values.
+- Rejected, malformed, oversized, duplicate-field, bot-trap, and timing-failed input never
+  reaches the provider.
+- Provider delivery has an eight-second timeout across the request and response body,
+  explicit network/non-2xx/malformed-acknowledgment handling, and redirects only after a
+  2xx `{ "accepted": true }` response.
+- Provider requests carry `Idempotency-Key` from the stable submission ID and
+  `X-Request-ID` for non-sensitive tracing. Repeat attempts use the same idempotency key.
+- `docs/DEPLOYMENT.md` names Rev Vaughn as accountable activation owner and requires a
+  provider/edge cap of 10 requests/minute, burst no greater than 5, and duplicate-key
+  suppression for at least 24 hours. No provider is selected, so activation remains a
+  launch blocker rather than a false production claim.
+- H.3 checks passed: validation (5 pages, 8 known warnings), lint, TypeScript, 42 tests,
+  and a 16-route production build.
+
 ---
 
 ## What already exists
 
-Phases 0–3 are done. You are extending a working framework, not starting one.
+Phases 0–3 and H.1–H.3 are done. You are extending a working framework, not starting one.
 
 | Thing | Where | Notes |
 |---|---|---|
@@ -104,8 +125,9 @@ Phases 0–3 are done. You are extending a working framework, not starting one.
 | Schema engine | `src/lib/schema/` | `buildSchema(page, site)` — LocalBusiness + BreadcrumbList always; FAQPage/Review conditional on section presence; WebSite/Service on `page.schema` opt-in |
 | Public conversion config | `src/types/site.ts` → `ConversionConfig`, `content/site.json` → `conversion` block | Display-safe `trackingPhone`, `displayPhone`, `thankYouPath`, and `model` only |
 | Server conversion config | `src/lib/server/conversion-config.ts` | Reads non-public `LEAD_DELIVERY_ENDPOINT` and optional `LEAD_DELIVERY_AUTHORIZATION`; never import into a Client Component |
+| Lead submission contract | `src/lib/contact-submission.ts` | Validates/normalizes input, enforces spam and size controls, applies provider timeout/acknowledgment/idempotency rules, and emits metadata-only outcomes |
 | Click-to-call | `src/components/common/CallLink.tsx` | Plain `<a href="tel:...">`, styled via `buttonVariants()` where it needs to look like a button — **not** `Button`'s `render` prop (injects `role="button"` onto real links, wrong) |
-| Contact form | `src/components/forms/ContactForm.tsx` + `src/lib/actions/contact.ts` | Server Action + `useActionState`, the framework's own idiomatic pattern per `forms.md`. Redirects to `conversion.thankYouPath` on success |
+| Contact form | `src/components/forms/ContactForm.tsx` + `src/lib/actions/contact.ts` | Accessible `useActionState` form with honeypot/timing/idempotency fields; the thin Server Action injects trusted configuration and redirects only after confirmed delivery |
 | Legal pages | `src/lib/legal.ts` + `src/app/(legal)/[slug]/page.tsx` | Generated templates, real business fields only, **not legal-reviewed** |
 | Mobile nav | `src/components/layout/MobileNav.tsx` | Client component isolated from `Header` (stays a Server Component); native `<button>`/`<Link>`, `aria-expanded`/`aria-controls`, closes on Escape/selection |
 
@@ -119,15 +141,23 @@ that way.
 `src/lib/content.ts` loads pages via static imports into a `PAGES` object:
 
 ```ts
+const parsedContent = parseContentBundle(
+  { source: "content/site.json", data: siteData },
+  [
+    { source: "content/pages/home.json", routePath: "/", data: homePage },
+    // ...one manually imported record per current page
+  ],
+);
+
 const PAGES = {
-  home: homePage as unknown as PageContent,
-  about: aboutPage as unknown as PageContent,
+  home: parsedContent.pages[0],
   // ...
 } satisfies Record<string, PageContent>;
 ```
 
-This was fine through Phase 3 because every page was known and named at build time. It
-stops being fine at 4.1: `services/[slug]`, `service-area/[slug]`, and `faq/[slug]` each
+H.1 made every import pass through the runtime parser, but the import list is still
+manual because every current page is known and named at build time. That enumeration
+stops scaling at 4.1: `services/[slug]`, `service-area/[slug]`, and `faq/[slug]` each
 need `generateStaticParams` over a **directory** of content files
 (`content/services/*.json`, `content/locations/*.json`, `content/faq/*.json` — see
 `CONTENT_SCHEMA.md`'s target shape), not a hand-maintained map entry per file. The
@@ -265,15 +295,19 @@ not per-niche forks), which is Rev's call, not yours.
 7. **The form configuration boundary was completed in H.2.** Preserve the server-only
    environment module, client action signature, validated server-side redirect, and
    metadata-only operational logs.
-8. **Lead abuse and failure controls are incomplete.** There are no maximum lengths,
-   provider timeout, bot trap, or documented rate-control owner. H.3.
+8. **Lead abuse and failure controls were completed in H.3.** Preserve the bounded
+   validation, honeypot/timing fields, eight-second provider timeout, acknowledgment
+   contract, stable idempotency key, accessible errors, and metadata-only logs. Durable
+   provider/edge rate control is documented but remains launch-blocked until a provider
+   is selected and the deployment owner records activation evidence.
 9. **Current proof and testimonial content is not verified.** The development sample
    includes licence/insurance language, numerical statistics, response-time claims, and
    testimonials that must be sourced or removed. H.4.
 10. **Schema and indexation need correction.** JSON-LD needs safe serialization and
     connected `@id` references; `/thank-you` must be noindex and leave the sitemap. H.5.
-11. **No automated project tests or CI exist.** H.6 establishes the regression suite
-    before routing and niche expansion.
+11. **Focused content-contract and lead-submission tests exist, but CI and the full
+    framework regression suite do not.** H.6 completes coverage before routing and niche
+    expansion.
 
 ---
 
