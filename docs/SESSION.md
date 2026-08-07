@@ -2,7 +2,8 @@
 
 **Version:** v0.5 complete; v0.5.1 H.1–H.6 complete
 **Next task:** **H.7** — documentation reconciliation and v0.5.1 release
-**Branch:** `agent/v0-5-1-h6` (includes H.6); `main` is at H.5, three commits behind
+**Branch:** `main` is current at `97fcf1f` — H.6 plus the 2026-08-06 documentation
+restructure. `agent/v0-5-1-h6` points at the same commit. Start H.7 from `main`.
 **First market:** Modesto, CA (roofing)
 **Authorized repo:** `ndxtraders/authority-site-generator-gpt`
 
