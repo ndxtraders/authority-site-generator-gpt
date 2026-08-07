@@ -185,11 +185,16 @@ We are building a machine that builds roofing websites.
 
 ## Where to go next
 
+`AGENTS.md` holds the full routing table. The most-used entries:
+
 | Document | Purpose |
 |---|---|
 | `docs/FRAMEWORK_PRD.md` | **Source of truth.** What we're building. |
+| `docs/SESSION.md` | Where we are and the exact next task. |
+| `docs/IMPLEMENTATION_PLAN.md` | Index into `docs/plan/` — one file per phase. |
+| `docs/DEFECTS.md` | Known defects, permanently numbered. |
+| `docs/HANDOFF.md` | Architecture map and hard-won rules. |
 | `docs/AUTHORITY_MODEL.md` | Strategy. Why authority precedes lead generation. |
-| `docs/IMPLEMENTATION_PLAN.md` | Current build plan, phase by phase. |
 | `docs/SYSTEMS_THINKING.md` | Parking lot. Non-binding ideas. |
 | `docs/AI_GUIDELINES.md` | Hard rules for writing code here. |
 | `docs/CHANGELOG.md` | What shipped. |

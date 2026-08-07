@@ -23,8 +23,8 @@ component.
 ## v0.5.1 hardening
 
 The TypeScript interfaces document the intended shape, but the runtime loader still
-trusts JSON after shallow checks. Phase H.1 in `IMPLEMENTATION_PLAN.md` replaces that
-trust boundary with shared runtime schemas that validate nested props, supported
+trusts JSON after shallow checks. Phase H.1 (`docs/plan/phase-h.md`, now complete)
+replaced that trust boundary with shared runtime schemas that validate nested props, supported
 section types, formats, unknown fields, and cross-file relationships.
 
 ## Phase 4 expansion

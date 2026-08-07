@@ -558,7 +558,8 @@ Explicitly out of scope for v1.0. Recorded so they don't get rebuilt by accident
 | `FRAMEWORK_PRD.md` | **This file.** What we're building. Source of truth. |
 | `AUTHORITY_MODEL.md` | Strategy. Why authority precedes lead generation. |
 | `SYSTEMS_THINKING.md` | Parking lot. Ideas not yet adopted. Non-binding. |
-| `IMPLEMENTATION_PLAN.md` | How to build v0.3–v1.0, including session boundaries. Disposable. |
+| `IMPLEMENTATION_PLAN.md` | Index into `docs/plan/` — how to build v0.3–v1.0. Disposable. |
+| `DEFECTS.md` | Known defects, permanently numbered. Cited from code comments. |
 | `CHANGELOG.md` | What shipped. |
 | Per-site brief | One page per site: business, market, domain, niche, local knowledge notes. |
 
